@@ -148,13 +148,14 @@ export const useTransactions = () => {
     const stockMap = new Map<string, PortfolioItem>()
 
     transactions.value.forEach(transaction => {
-      const { symbol, type, quantity, price, fee, stockName } = transaction
+      const { symbol, type, quantity, price, fee, stockName, assetType } = transaction
       const total = quantity * price + fee
 
       if (!stockMap.has(symbol)) {
         stockMap.set(symbol, {
           symbol,
           stockName,
+          assetType: assetType || 'tw_stock',
           quantity: 0,
           totalCost: 0,
           avgCost: 0,
@@ -267,6 +268,7 @@ export const useTransactions = () => {
 export interface PortfolioItem {
   symbol: string
   stockName: string
+  assetType: 'tw_stock' | 'us_stock' | 'crypto' | 'bond' | 'financial_product'
   quantity: number
   avgCost: number
   currentPrice: number

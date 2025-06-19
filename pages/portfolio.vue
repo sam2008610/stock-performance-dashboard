@@ -16,8 +16,9 @@
         <table class="min-w-full divide-y divide-gray-200 dark:divide-[#6272a4]">
           <thead class="bg-gray-50 dark:bg-[#6272a4]/30">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-[#f8f8f2] uppercase tracking-wider">股票代碼</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-[#f8f8f2] uppercase tracking-wider">股票名稱</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-[#f8f8f2] uppercase tracking-wider">代碼</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-[#f8f8f2] uppercase tracking-wider">名稱</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-[#f8f8f2] uppercase tracking-wider">資產類型</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-[#f8f8f2] uppercase tracking-wider">持有數量</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-[#f8f8f2] uppercase tracking-wider">平均成本</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-[#f8f8f2] uppercase tracking-wider">當前價格</th>
@@ -30,11 +31,17 @@
             <tr v-for="stock in portfolio" :key="stock.symbol" class="hover:bg-gray-50 dark:hover:bg-[#6272a4]/20 transition-colors duration-200">
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">{{ stock.symbol }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">{{ stock.stockName }}</td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                      :class="getAssetTypeClass(stock.assetType)">
+                  {{ getAssetTypeName(stock.assetType) }}
+                </span>
+              </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">{{ stock.quantity }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">NT$ {{ stock.avgCost.toFixed(2) }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">NT$ {{ stock.currentPrice.toFixed(2) }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">NT$ {{ stock.totalCost.toLocaleString() }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">NT$ {{ stock.currentValue.toLocaleString() }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">{{ formatCurrency(stock.avgCost, stock.assetType) }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">{{ formatCurrency(stock.currentPrice, stock.assetType) }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">{{ formatCurrency(stock.totalCost, stock.assetType, true) }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">{{ formatCurrency(stock.currentValue, stock.assetType, true) }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm" :class="stock.returnRate >= 0 ? 'text-green-600 dark:text-[#50fa7b]' : 'text-red-600 dark:text-[#ff5555]'">
                 {{ stock.returnRate.toFixed(2) }}%
               </td>
@@ -149,6 +156,46 @@ const clearCacheAndRefresh = async () => {
   } finally {
     isClearing.value = false
   }
+}
+
+// 獲取資產類型名稱
+const getAssetTypeName = (assetType: string) => {
+  const names: Record<string, string> = {
+    tw_stock: '台股',
+    us_stock: '美股',
+    crypto: '加密貨幣',
+    bond: '債券',
+    financial_product: '金融商品'
+  }
+  return names[assetType] || '台股'
+}
+
+// 獲取資產類型樣式
+const getAssetTypeClass = (assetType: string) => {
+  const classes: Record<string, string> = {
+    tw_stock: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    us_stock: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+    crypto: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    bond: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    financial_product: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+  }
+  return classes[assetType] || classes.tw_stock
+}
+
+// 格式化貨幣顯示
+const formatCurrency = (amount: number, assetType: string, useLocale: boolean = false) => {
+  const currencies: Record<string, string> = {
+    tw_stock: 'NT$',
+    us_stock: 'USD',
+    crypto: 'USD',
+    bond: 'USD',
+    financial_product: 'USD'
+  }
+  
+  const currency = currencies[assetType] || 'NT$'
+  const formattedAmount = useLocale ? amount.toLocaleString() : amount.toFixed(2)
+  
+  return `${currency} ${formattedAmount}`
 }
 
 // 主題偵測

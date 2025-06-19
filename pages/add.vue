@@ -22,7 +22,7 @@
             :class="form.type === 'buy' ? 
               'bg-gradient-to-r from-red-600 to-rose-600 dark:from-red-400 dark:to-rose-400 bg-clip-text text-transparent' : 
               'bg-gradient-to-r from-emerald-600 to-green-600 dark:from-emerald-400 dark:to-green-400 bg-clip-text text-transparent'">
-          {{ form.type === 'buy' ? '股票買入' : '股票賣出' }}
+          {{ form.type === 'buy' ? '資產買入' : '資產賣出' }}
         </h2>
         <p class="text-gray-600 dark:text-gray-400">
           {{ form.type === 'buy' ? '建立您的投資部位' : '實現您的投資收益' }}

@@ -1,15 +1,10 @@
 <template>
-  <div class="max-w-2xl mx-auto">
-    <div class="shadow-xl rounded-2xl p-8 transition-all duration-500 backdrop-blur-sm" 
-         :class="form.type === 'buy' ? 
-           'bg-gradient-to-br from-red-50 via-rose-50 to-pink-50 dark:from-red-900/20 dark:via-rose-900/20 dark:to-pink-900/20 border border-red-200/50 dark:border-red-700/50' : 
-           'bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-900/20 dark:via-green-900/20 dark:to-teal-900/20 border border-emerald-200/50 dark:border-emerald-700/50'">
-      
-      <!-- 標題區域 -->
+  <div class="max-w-3xl mx-auto px-4 py-10">
+    <div class="rounded-2xl shadow-xl bg-white/80 dark:bg-[#23272f]/80 backdrop-blur p-8 mb-8">
       <div class="text-center mb-8">
         <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 transition-all duration-300"
-             :class="form.type === 'buy' ? 
-               'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/25' : 
+             :class="form.type === 'buy' ?
+               'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/25' :
                'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/25'">
           <svg v-if="form.type === 'buy'" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -18,51 +13,35 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
           </svg>
         </div>
-        <h2 class="text-3xl font-bold mb-2 transition-colors duration-300" 
-            :class="form.type === 'buy' ? 
-              'bg-gradient-to-r from-red-600 to-rose-600 dark:from-red-400 dark:to-rose-400 bg-clip-text text-transparent' : 
-              'bg-gradient-to-r from-emerald-600 to-green-600 dark:from-emerald-400 dark:to-green-400 bg-clip-text text-transparent'">
-          {{ form.type === 'buy' ? '資產買入' : '資產賣出' }}
+        <h2 class="text-3xl font-extrabold tracking-tight mb-2 transition-colors duration-300 bg-gradient-to-r from-red-600 to-rose-600 dark:from-red-400 dark:to-rose-400 bg-clip-text text-transparent" v-if="form.type === 'buy'">
+          資產買入
+        </h2>
+        <h2 class="text-3xl font-extrabold tracking-tight mb-2 transition-colors duration-300 bg-gradient-to-r from-emerald-600 to-green-600 dark:from-emerald-400 dark:to-green-400 bg-clip-text text-transparent" v-else>
+          資產賣出
         </h2>
         <p class="text-gray-600 dark:text-gray-400">
           {{ form.type === 'buy' ? '建立您的投資部位' : '實現您的投資收益' }}
         </p>
       </div>
-      
-      <form @submit.prevent="handleSubmit" class="space-y-6">
+      <form @submit.prevent="handleSubmit" class="space-y-8">
         <!-- 交易類型選擇 -->
-        <div class="space-y-2">
-          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-            交易類型
-          </label>
-          <div class="grid grid-cols-2 gap-3">
-            <button type="button" 
-                    @click="form.type = 'buy'; onTypeChange()"
-                    class="relative px-4 py-3 rounded-xl font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                    :class="form.type === 'buy' ? 
-                      'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/25 focus:ring-red-500 transform scale-105' : 
-                      'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-gray-500'">
-              <span class="flex items-center justify-center space-x-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                <span>買入</span>
-              </span>
-            </button>
-            <button type="button" 
-                    @click="form.type = 'sell'; onTypeChange()"
-                    class="relative px-4 py-3 rounded-xl font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                    :class="form.type === 'sell' ? 
-                      'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/25 focus:ring-emerald-500 transform scale-105' : 
-                      'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-gray-500'">
-              <span class="flex items-center justify-center space-x-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
-                </svg>
-                <span>賣出</span>
-              </span>
-            </button>
-          </div>
+        <div class="flex gap-4 justify-center mb-6">
+          <button type="button"
+                  @click="form.type = 'buy'; onTypeChange()"
+                  class="px-6 py-3 rounded-full font-bold text-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                  :class="form.type === 'buy' ?
+                    'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/25 focus:ring-red-500 scale-105' :
+                    'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-gray-500'">
+            買入
+          </button>
+          <button type="button"
+                  @click="form.type = 'sell'; onTypeChange()"
+                  class="px-6 py-3 rounded-full font-bold text-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                  :class="form.type === 'sell' ?
+                    'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/25 focus:ring-emerald-500 scale-105' :
+                    'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-gray-500'">
+            賣出
+          </button>
         </div>
 
         <!-- 資產類型選擇 -->
@@ -748,4 +727,4 @@ onMounted(async () => {
   // 預先載入股票清單
   loadFullStockList()
 })
-</script> 
+</script>

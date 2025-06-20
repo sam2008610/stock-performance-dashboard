@@ -1,48 +1,67 @@
 <template>
-  <div class="space-y-6">
-    <div class="bg-white dark:bg-[#44475a] shadow rounded-lg p-6 transition-colors duration-200">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-[#f8f8f2]">投資組合</h2>
+  <div class="max-w-7xl mx-auto px-4 py-10 grid gap-10">
+    <!-- Summary 區塊：總資金與總報酬率（柔和色調） -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex flex-col md:flex-row gap-4 w-full">
+        <div class="flex-1 rounded-xl bg-gradient-to-r from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800 shadow p-6">
+          <div class="text-lg font-semibold mb-1 text-gray-700 dark:text-gray-200">總資金</div>
+          <div class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">NT$ {{ totalValue.toLocaleString() }}</div>
+        </div>
+        <div class="flex-1 rounded-xl bg-gradient-to-r from-gray-200 to-gray-100 dark:from-gray-700 dark:to-gray-800 shadow p-6">
+          <div class="text-lg font-semibold mb-1 text-gray-700 dark:text-gray-200">總報酬率</div>
+          <div class="text-3xl font-extrabold tracking-tight" :class="totalReturnRate >= 0 ? 'text-green-600 dark:text-green-300' : 'text-red-600 dark:text-red-300'">
+            {{ totalReturnRate.toFixed(2) }}%
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 投資組合卡片 -->
+    <div class="rounded-2xl shadow-xl bg-white/80 dark:bg-[#23272f]/80 backdrop-blur p-8 mb-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+        <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
+          <span class="inline-block w-2 h-8 bg-gradient-to-b from-[#8b5cf6] to-[#06b6d4] rounded-full mr-2"></span>
+          投資組合
+        </h2>
         <button 
           @click="clearCacheAndRefresh"
           :disabled="isClearing"
-          class="px-4 py-2 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 text-white text-sm font-medium rounded-md transition-colors duration-200 disabled:opacity-50"
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] text-white font-semibold shadow-lg hover:from-[#7c3aed] hover:to-[#0ea5e9] transition disabled:opacity-50"
         >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582M20 20v-5h-.581M5 9A7 7 0 0112 5a7 7 0 017 7v3m-7 7a7 7 0 01-7-7v-3m7 7a7 7 0 007-7"/></svg>
           {{ isClearing ? '清除中...' : '清除快取' }}
         </button>
       </div>
-      
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-[#6272a4]">
-          <thead class="bg-gray-50 dark:bg-[#6272a4]/30">
+      <div class="overflow-x-auto rounded-xl border border-gray-100 dark:border-[#23272f] bg-white/70 dark:bg-[#23272f]/70">
+        <table class="min-w-full text-sm text-left">
+          <thead class="bg-gradient-to-r from-[#f3f4f6] to-[#e0e7ef] dark:from-[#23272f] dark:to-[#23272f]">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-[#f8f8f2] uppercase tracking-wider">代碼</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-[#f8f8f2] uppercase tracking-wider">名稱</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-[#f8f8f2] uppercase tracking-wider">資產類型</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-[#f8f8f2] uppercase tracking-wider">持有數量</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-[#f8f8f2] uppercase tracking-wider">平均成本</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-[#f8f8f2] uppercase tracking-wider">當前價格</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-[#f8f8f2] uppercase tracking-wider">總成本</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-[#f8f8f2] uppercase tracking-wider">當前價值</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-[#f8f8f2] uppercase tracking-wider">報酬率</th>
+              <th class="px-6 py-4 font-bold text-gray-500 dark:text-[#8be9fd] uppercase tracking-wider">代碼</th>
+              <th class="px-6 py-4 font-bold text-gray-500 dark:text-[#8be9fd] uppercase tracking-wider">名稱</th>
+              <th class="px-6 py-4 font-bold text-gray-500 dark:text-[#8be9fd] uppercase tracking-wider">資產類型</th>
+              <th class="px-6 py-4 font-bold text-gray-500 dark:text-[#8be9fd] uppercase tracking-wider">持有數量</th>
+              <th class="px-6 py-4 font-bold text-gray-500 dark:text-[#8be9fd] uppercase tracking-wider">平均成本</th>
+              <th class="px-6 py-4 font-bold text-gray-500 dark:text-[#8be9fd] uppercase tracking-wider">當前價格</th>
+              <th class="px-6 py-4 font-bold text-gray-500 dark:text-[#8be9fd] uppercase tracking-wider">總成本</th>
+              <th class="px-6 py-4 font-bold text-gray-500 dark:text-[#8be9fd] uppercase tracking-wider">當前價值</th>
+              <th class="px-6 py-4 font-bold text-gray-500 dark:text-[#8be9fd] uppercase tracking-wider">報酬率</th>
             </tr>
           </thead>
-          <tbody class="bg-white dark:bg-[#44475a] divide-y divide-gray-200 dark:divide-[#6272a4]">
-            <tr v-for="stock in portfolio" :key="stock.symbol" class="hover:bg-gray-50 dark:hover:bg-[#6272a4]/20 transition-colors duration-200">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">{{ stock.symbol }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">{{ stock.stockName }}</td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                      :class="getAssetTypeClass(stock.assetType)">
+          <tbody>
+            <tr v-for="stock in portfolio" :key="stock.symbol" class="hover:bg-[#f3f4f6] dark:hover:bg-[#282a36] transition">
+              <td class="px-6 py-4 font-mono text-base text-gray-900 dark:text-[#f8f8f2]">{{ stock.symbol }}</td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ stock.stockName }}</td>
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold" :class="getAssetTypeClass(stock.assetType)">
                   {{ getAssetTypeName(stock.assetType) }}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">{{ stock.quantity }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">{{ formatCurrency(stock.avgCost, stock.assetType) }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">{{ formatCurrency(stock.currentPrice, stock.assetType) }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">{{ formatCurrency(stock.totalCost, stock.assetType, true) }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-[#f8f8f2]">{{ formatCurrency(stock.currentValue, stock.assetType, true) }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm" :class="stock.returnRate >= 0 ? 'text-green-600 dark:text-[#50fa7b]' : 'text-red-600 dark:text-[#ff5555]'">
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ stock.quantity }}</td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ formatCurrency(stock.avgCost, stock.assetType) }}</td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ formatCurrency(stock.currentPrice, stock.assetType) }}</td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ formatCurrency(stock.totalCost, stock.assetType, true) }}</td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ formatCurrency(stock.currentValue, stock.assetType, true) }}</td>
+              <td class="px-6 py-4 text-base font-bold" :class="stock.returnRate >= 0 ? 'text-green-600 dark:text-[#50fa7b]' : 'text-red-600 dark:text-[#ff5555]'">
                 {{ stock.returnRate.toFixed(2) }}%
               </td>
             </tr>
@@ -51,17 +70,21 @@
       </div>
     </div>
 
-    <div class="bg-white dark:bg-[#44475a] shadow rounded-lg p-6 transition-colors duration-200">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-[#f8f8f2]">資產配置</h2>
-        <div class="flex bg-gray-100 dark:bg-[#6272a4]/30 rounded-lg p-1">
+    <!-- 資產配置卡片 -->
+    <div class="rounded-2xl shadow-xl bg-white/80 dark:bg-[#23272f]/80 backdrop-blur p-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+        <h2 class="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
+          <span class="inline-block w-2 h-8 bg-gradient-to-b from-[#06b6d4] to-[#8b5cf6] rounded-full mr-2"></span>
+          資產配置
+        </h2>
+        <div class="flex bg-gray-100 dark:bg-[#282a36] rounded-lg p-1 gap-2">
           <button
             @click="chartType = 'pie'"
             :class="[
-              'px-4 py-2 rounded-md text-sm font-medium transition-all duration-200',
+              'px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200',
               chartType === 'pie' 
-                ? 'bg-white dark:bg-[#bd93f9] text-gray-900 dark:text-[#282a36] shadow-sm' 
-                : 'text-gray-600 dark:text-[#f8f8f2] hover:text-gray-900 dark:hover:text-[#bd93f9]'
+                ? 'bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] text-white shadow' 
+                : 'text-gray-600 dark:text-[#8be9fd] hover:text-[#8b5cf6] dark:hover:text-[#50fa7b]'
             ]"
           >
             圓餅圖
@@ -69,17 +92,16 @@
           <button
             @click="chartType = 'area'"
             :class="[
-              'px-4 py-2 rounded-md text-sm font-medium transition-all duration-200',
+              'px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200',
               chartType === 'area' 
-                ? 'bg-white dark:bg-[#bd93f9] text-gray-900 dark:text-[#282a36] shadow-sm' 
-                : 'text-gray-600 dark:text-[#f8f8f2] hover:text-gray-900 dark:hover:text-[#bd93f9]'
+                ? 'bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] text-white shadow' 
+                : 'text-gray-600 dark:text-[#8be9fd] hover:text-[#8b5cf6] dark:hover:text-[#50fa7b]'
             ]"
           >
             面積圖
           </button>
         </div>
       </div>
-      
       <div class="h-96">
         <Pie
           v-if="chartType === 'pie' && pieChartData"
@@ -457,6 +479,18 @@ const areaChartOptions = computed(() => ({
   }
 }))
 
+// 在 <script setup lang="ts"> 內加入 summary 計算
+const totalValue = computed(() => {
+  return portfolio.value.reduce((sum, stock) => sum + (stock.currentValue || 0), 0)
+})
+const totalCost = computed(() => {
+  return portfolio.value.reduce((sum, stock) => sum + (stock.totalCost || 0), 0)
+})
+const totalReturnRate = computed(() => {
+  if (totalCost.value === 0) return 0
+  return ((totalValue.value - totalCost.value) / totalCost.value) * 100
+})
+
 onMounted(async () => {
   // 檢查初始主題
   checkTheme()
@@ -481,4 +515,4 @@ onMounted(async () => {
     updateStockNames()
   ])
 })
-</script> 
+</script>

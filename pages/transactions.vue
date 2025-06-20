@@ -2,7 +2,13 @@
 <template>
   <div class="container mx-auto px-4 py-8">
     <h1 class="text-3xl font-bold mb-6 text-gray-900 dark:text-[#f8f8f2]">交易記錄</h1>
-    
+    <!-- 匯出 CSV 按鈕 -->
+    <button
+      class="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+      @click="exportCSV"
+    >
+      匯出 CSV
+    </button>
     <!-- Transaction Table -->
     <div class="overflow-x-auto bg-white dark:bg-[#44475a] rounded-lg shadow transition-colors duration-200">
       <table class="min-w-full divide-y divide-gray-200 dark:divide-[#6272a4]">
@@ -134,11 +140,32 @@ const getAssetTypeStyle = (assetType: string) => {
 const formatPrice = (price: number, assetType?: string) => {
   const currency = assetType === 'tw_stock' ? 'TWD' : 'USD'
   const locale = assetType === 'tw_stock' ? 'zh-TW' : 'en-US'
-  
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency,
     minimumFractionDigits: 2
   }).format(price)
 }
-</script> 
+
+// 匯出 CSV 功能
+function exportCSV() {
+  if (!sortedTransactions.value.length) {
+    alert('沒有交易資料可匯出')
+    return
+  }
+  const headers = Object.keys(sortedTransactions.value[0])
+  const rows = sortedTransactions.value.map(tx =>
+    headers.map(h => `"${(tx[h] ?? '').toString().replace(/"/g, '""')}` ).join(',')
+  )
+  const csvContent = [headers.join(','), ...rows].join('\r\n')
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `transactions_${new Date().toISOString().slice(0,10)}.csv`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+</script>

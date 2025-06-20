@@ -15,7 +15,7 @@
           匯出 CSV
         </button>
       </div>
-      <div class="overflow-x-auto rounded-xl border border-gray-100 dark:border-[#23272f] bg-white/70 dark:bg-[#23272f]/70">
+      <div class="overflow-x-auto rounded-xl border border-gray-100 dark:border-[#6272a4] bg-white/70 dark:bg-[#23272f]/70">
         <table class="min-w-full text-sm text-left">
           <thead class="bg-gradient-to-r from-[#f3f4f6] to-[#e0e7ef] dark:from-[#23272f] dark:to-[#23272f]">
             <tr>

@@ -30,16 +30,16 @@
                   @click="form.type = 'buy'; onTypeChange()"
                   class="px-6 py-3 rounded-full font-bold text-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2"
                   :class="form.type === 'buy' ?
-                    'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/25 focus:ring-red-500 scale-105' :
-                    'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-gray-500'">
+                    'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/25 focus:ring-red-500 transform scale-105' : 
+                    'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#6272a4] hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-gray-500'">
             買入
           </button>
           <button type="button"
                   @click="form.type = 'sell'; onTypeChange()"
                   class="px-6 py-3 rounded-full font-bold text-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2"
                   :class="form.type === 'sell' ?
-                    'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/25 focus:ring-emerald-500 scale-105' :
-                    'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-gray-500'">
+                    'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/25 focus:ring-emerald-500 transform scale-105' :
+                    'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#6272a4] hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-gray-500'">
             賣出
           </button>
         </div>
@@ -52,7 +52,7 @@
           <select 
             v-model="form.assetType"
             @change="onAssetTypeChange"
-            class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset ring-gray-200 dark:ring-gray-700 bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 transition-all duration-200 focus:ring-2 focus:ring-inset"
+            class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset ring-gray-200 dark:ring-[#6272a4] bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 transition-all duration-200 focus:ring-2 focus:ring-inset"
             :class="form.type === 'buy' ? 'focus:ring-red-500 dark:focus:ring-red-400' : 'focus:ring-emerald-500 dark:focus:ring-emerald-400'"
             required
           >
@@ -116,7 +116,7 @@
             
             <!-- 搜尋結果下拉選單 -->
             <div v-if="showSearchResults && searchResults.length > 0" 
-                 class="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 max-h-60 overflow-auto">
+                 class="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-[#6272a4] max-h-60 overflow-auto">
               <div v-for="(result, index) in searchResults" 
                    :key="`${result.symbol}-${index}`"
                    @click="selectStock(result)"
@@ -169,7 +169,7 @@
             <input 
               type="date" 
               v-model="form.date"
-              class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset ring-gray-200 dark:ring-gray-700 bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 transition-all duration-200 focus:ring-2 focus:ring-inset"
+              class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset ring-gray-200 dark:ring-[#6272a4] bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 transition-all duration-200 focus:ring-2 focus:ring-inset"
               :class="form.type === 'buy' ? 'focus:ring-red-500 dark:focus:ring-red-400' : 'focus:ring-emerald-500 dark:focus:ring-emerald-400'"
               required
             >
@@ -187,7 +187,7 @@
               type="number" 
               v-model="form.quantity"
               @input="validateQuantity"
-              class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset ring-gray-200 dark:ring-gray-700 bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 transition-all duration-200 focus:ring-2 focus:ring-inset"
+              class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset ring-gray-200 dark:ring-[#6272a4] bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 transition-all duration-200 focus:ring-2 focus:ring-inset"
               :class="form.type === 'buy' ? 'focus:ring-red-500 dark:focus:ring-red-400' : 'focus:ring-emerald-500 dark:focus:ring-emerald-400'"
               min="1"
               :max="form.type === 'sell' ? availableShares : undefined"
@@ -203,7 +203,7 @@
             <input 
               type="number" 
               v-model="form.price"
-              class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset ring-gray-200 dark:ring-gray-700 bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 transition-all duration-200 focus:ring-2 focus:ring-inset"
+              class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset ring-gray-200 dark:ring-[#6272a4] bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 transition-all duration-200 focus:ring-2 focus:ring-inset"
               :class="form.type === 'buy' ? 'focus:ring-red-500 dark:focus:ring-red-400' : 'focus:ring-emerald-500 dark:focus:ring-emerald-400'"
               min="0"
               step="0.01"
@@ -219,7 +219,7 @@
             <input 
               type="number" 
               v-model="form.fee"
-              class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset ring-gray-200 dark:ring-gray-700 bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 transition-all duration-200 focus:ring-2 focus:ring-inset"
+              class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset ring-gray-200 dark:ring-[#6272a4] bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 transition-all duration-200 focus:ring-2 focus:ring-inset"
               :class="form.type === 'buy' ? 'focus:ring-red-500 dark:focus:ring-red-400' : 'focus:ring-emerald-500 dark:focus:ring-emerald-400'"
               min="0"
               step="0.01"
@@ -257,10 +257,12 @@ import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTransactions } from '~/composables/useTransactions'
 import { useStockPrice } from '~/composables/useStockPrice'
+import { useAssetHistory } from '~/composables/useAssetHistory'
 
 const router = useRouter()
-const { addTransaction, initialize, portfolio } = useTransactions()
-const { getStockName } = useStockPrice()
+const { addTransaction, portfolio, initialize } = useTransactions()
+const { clearCache } = useStockPrice()
+const { currentAssets, addAssetSnapshot } = useAssetHistory()
 
 // 表單資料
 const form = ref({
@@ -701,6 +703,13 @@ const handleSubmit = async () => {
     total: total,
     stockName: stockName.value || form.value.symbol.trim()
   })
+
+  // 更新資產快照
+  if (currentAssets.value) {
+    const currentCash = currentAssets.value.cash
+    const currentInvestment = portfolio.value.reduce((sum, stock) => sum + stock.currentValue, 0)
+    addAssetSnapshot(currentCash, currentInvestment, `新增${form.value.type === 'buy' ? '買入' : '賣出'}交易`)
+  }
 
   // 重置表單
   form.value = {

@@ -266,7 +266,7 @@ ChartJS.register(
 
 const { portfolio, transactions, initialize, updateStockPrices, updateStockNames } = useTransactions()
 const { clearCache } = useStockPrice()
-const { assetTrend, loadAssetHistory, currentAssets, getStockHistory } = useAssetHistory()
+const { assetHistory, initialSetup, loadAssetHistory, currentAssets, getStockHistory } = useAssetHistory()
 
 // 圖表類型切換
 const chartType = ref<'pie' | 'area'>('pie')
@@ -424,20 +424,42 @@ const areaChartData = computed(() => {
   const datasets = []
   
   // 檢查是否有足夠的資產歷史數據
-  const hasValidHistory = assetTrend.value.length > 1 && 
-    new Set(assetTrend.value.map(item => item.date)).size > 1
+  const hasValidHistory = assetHistory.value.length > 1 && 
+    new Set(assetHistory.value.map(item => item.date)).size > 1
   
   if (hasValidHistory) {
     // 使用真實的歷史數據
     
     // 加入現金數據集
     const cashData = months.map(monthDate => {
-      // 找到最接近該月份的資產快照
-      const snapshot = assetTrend.value
-        .filter(item => new Date(item.date) <= new Date(monthDate))
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
+      const monthDateObj = new Date(monthDate)
       
-      return snapshot ? snapshot.cash : 0
+      // 先找該月份之前或當月的快照（向後找）
+      const snapshotsBefore = assetHistory.value
+        .filter(item => new Date(item.date) <= monthDateObj)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      
+      if (snapshotsBefore.length > 0) {
+        // 有該月份之前的快照，使用最近的一個
+        return snapshotsBefore[0].cash
+      }
+      
+      // 沒有該月份之前的快照，找該月份之後的快照（向前找）
+      const snapshotsAfter = assetHistory.value
+        .filter(item => new Date(item.date) > monthDateObj)
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      
+      if (snapshotsAfter.length > 0) {
+        // 有該月份之後的快照，使用最近的一個
+        return snapshotsAfter[0].cash
+      }
+      
+      // 沒有任何快照，使用初始設定
+      if (initialSetup.value.isCompleted) {
+        return initialSetup.value.initialCash
+      }
+      
+      return 0
     })
     
     if (cashData.some(value => value > 0)) {
@@ -459,14 +481,37 @@ const areaChartData = computed(() => {
       const stockHistory = getStockHistory(stock.symbol)
       
       const stockData = months.map(monthDate => {
-        // 找到最接近該月份的股票持有量
-        const historyItem = stockHistory
-          .filter(h => new Date(h.date) <= new Date(monthDate))
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
+        const monthDateObj = new Date(monthDate)
         
-        if (historyItem && historyItem.quantity > 0) {
-          return historyItem.totalCost
+        // 先找該月份之前或當月的股票持有量（向後找）
+        const historyBefore = stockHistory
+          .filter(h => new Date(h.date) <= monthDateObj)
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        
+        if (historyBefore.length > 0) {
+          // 有該月份之前的歷史記錄，使用最近的一個
+          const historyItem = historyBefore[0]
+          if (historyItem.quantity > 0) {
+            return historyItem.totalCost
+          }
+          return 0
         }
+        
+        // 沒有該月份之前的歷史記錄，找該月份之後的記錄（向前找）
+        const historyAfter = stockHistory
+          .filter(h => new Date(h.date) > monthDateObj)
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        
+        if (historyAfter.length > 0) {
+          // 有該月份之後的歷史記錄，使用最近的一個
+          const historyItem = historyAfter[0]
+          if (historyItem.quantity > 0) {
+            return historyItem.totalCost
+          }
+          return 0
+        }
+        
+        // 沒有任何歷史記錄，返回0
         return 0
       })
       
@@ -744,26 +789,80 @@ const areaChartOptions = computed(() => ({
 const assetTrendChartData = computed(() => {
   checkTheme()
   
-  // 過濾指定時間範圍的數據
+  // 生成連續的時間軸（按月）
+  const months: string[] = []
   const now = new Date()
-  const cutoffDate = new Date(now.getFullYear(), now.getMonth() - assetTimeRange.value, 1)
+  for (let i = assetTimeRange.value - 1; i >= 0; i--) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    months.push(date.toISOString().split('T')[0]) // 使用 YYYY-MM-DD 格式
+  }
   
-  const filteredTrend = assetTrend.value.filter(item => {
-    const itemDate = new Date(item.date)
-    return itemDate >= cutoffDate
+  if (months.length === 0) return null
+  
+  // 為每個月份生成現金和投資數據
+  const cashData = months.map(monthDate => {
+    const monthDateObj = new Date(monthDate)
+    
+    // 先找該月份之前或當月的快照（向後找）
+    const snapshotsBefore = assetHistory.value
+      .filter(item => new Date(item.date) <= monthDateObj)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    
+    if (snapshotsBefore.length > 0) {
+      return snapshotsBefore[0].cash
+    }
+    
+    // 沒有該月份之前的快照，找該月份之後的快照（向前找）
+    const snapshotsAfter = assetHistory.value
+      .filter(item => new Date(item.date) > monthDateObj)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    
+    if (snapshotsAfter.length > 0) {
+      return snapshotsAfter[0].cash
+    }
+    
+    // 沒有任何快照，使用初始設定
+    if (initialSetup.value.isCompleted) {
+      return initialSetup.value.initialCash
+    }
+    
+    return 0
   })
   
-  if (filteredTrend.length === 0) return null
+  const investmentData = months.map(monthDate => {
+    const monthDateObj = new Date(monthDate)
+    
+    // 先找該月份之前或當月的快照（向後找）
+    const snapshotsBefore = assetHistory.value
+      .filter(item => new Date(item.date) <= monthDateObj)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    
+    if (snapshotsBefore.length > 0) {
+      return snapshotsBefore[0].investment
+    }
+    
+    // 沒有該月份之前的快照，找該月份之後的快照（向前找）
+    const snapshotsAfter = assetHistory.value
+      .filter(item => new Date(item.date) > monthDateObj)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    
+    if (snapshotsAfter.length > 0) {
+      return snapshotsAfter[0].investment
+    }
+    
+    // 沒有任何快照，投資為0
+    return 0
+  })
   
   return {
-    labels: filteredTrend.map(item => {
-      const date = new Date(item.date)
-      return date.toLocaleDateString('zh-TW', { year: 'numeric', month: 'short', day: 'numeric' })
+    labels: months.map(monthDate => {
+      const date = new Date(monthDate)
+      return date.toLocaleDateString('zh-TW', { year: 'numeric', month: 'short' })
     }),
     datasets: [
       {
         label: '現金',
-        data: filteredTrend.map(item => item.cash),
+        data: cashData,
         borderColor: isDarkMode.value ? '#50fa7b' : '#10b981',
         backgroundColor: isDarkMode.value ? '#50fa7b40' : '#10b98140',
         fill: true,
@@ -774,7 +873,7 @@ const assetTrendChartData = computed(() => {
       },
       {
         label: '投資',
-        data: filteredTrend.map(item => item.investment),
+        data: investmentData,
         borderColor: isDarkMode.value ? '#ff79c6' : '#ec4899',
         backgroundColor: isDarkMode.value ? '#ff79c640' : '#ec489940',
         fill: true,

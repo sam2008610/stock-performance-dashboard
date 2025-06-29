@@ -1,4 +1,6 @@
 import { ref, computed } from 'vue'
+import { useSecureStorage } from '~/composables/useSecureStorage'
+import type { Transaction } from '~/composables/useTransactions'
 
 export interface AssetSnapshot {
   date: string
@@ -21,35 +23,46 @@ export const useAssetHistory = () => {
     startDate: '',
     isCompleted: false
   })
+  const { getItem, setItem } = useSecureStorage()
 
   // 載入資料
-  const loadAssetHistory = () => {
+  const loadAssetHistory = async () => {
     try {
-      const stored = localStorage.getItem('asset_history')
-      if (stored) {
-        assetHistory.value = JSON.parse(stored)
+      const stored = await getItem<AssetSnapshot[]>('asset_history')
+      if (stored && Array.isArray(stored)) {
+        assetHistory.value = stored
+      } else {
+        assetHistory.value = []
       }
       
-      const setup = localStorage.getItem('initial_setup')
+      const setup = await getItem<InitialSetup>('initial_setup')
       if (setup) {
-        initialSetup.value = JSON.parse(setup)
+        initialSetup.value = setup
       }
+      
+      console.log('資產歷史已載入，快照數量:', assetHistory.value.length)
     } catch (error) {
       console.error('載入資產歷史失敗:', error)
+      assetHistory.value = []
     }
   }
 
   // 儲存資料
-  const saveAssetHistory = () => {
+  const saveAssetHistory = async () => {
     try {
-      localStorage.setItem('asset_history', JSON.stringify(assetHistory.value))
+      const success = await setItem('asset_history', assetHistory.value)
+      if (success) {
+        console.log('資產歷史已加密儲存，快照數量:', assetHistory.value.length)
+      } else {
+        console.error('儲存資產歷史失敗')
+      }
     } catch (error) {
       console.error('儲存資產歷史失敗:', error)
     }
   }
 
   // 完成初始設定
-  const completeInitialSetup = (cash: number, startDate: string) => {
+  const completeInitialSetup = async (cash: number, startDate: string) => {
     initialSetup.value = {
       initialCash: cash,
       startDate,
@@ -65,12 +78,12 @@ export const useAssetHistory = () => {
     }
     
     assetHistory.value = [initialSnapshot]
-    saveAssetHistory()
-    localStorage.setItem('initial_setup', JSON.stringify(initialSetup.value))
+    await saveAssetHistory()
+    await setItem('initial_setup', initialSetup.value)
   }
 
   // 新增資產快照
-  const addAssetSnapshot = (cash: number, investment: number, note?: string) => {
+  const addAssetSnapshot = async (cash: number, investment: number, note?: string) => {
     const snapshot: AssetSnapshot = {
       date: new Date().toISOString().split('T')[0],
       cash,
@@ -80,11 +93,11 @@ export const useAssetHistory = () => {
     }
     
     assetHistory.value.push(snapshot)
-    saveAssetHistory()
+    await saveAssetHistory()
   }
 
   // 更新現金餘額
-  const updateCashBalance = (newCash: number) => {
+  const updateCashBalance = async (newCash: number) => {
     if (assetHistory.value.length === 0) return
     
     // 更新最新的資產快照
@@ -92,7 +105,7 @@ export const useAssetHistory = () => {
     latestSnapshot.cash = newCash
     latestSnapshot.total = newCash + latestSnapshot.investment
     
-    saveAssetHistory()
+    await saveAssetHistory()
   }
 
   // 重建資產歷史（根據交易記錄推算）
@@ -108,7 +121,7 @@ export const useAssetHistory = () => {
     console.log('交易記錄數量:', transactions.value.length)
     
     // 按日期排序交易記錄（從新到舊）
-    const sortedTransactions = transactions.value.sort((a: any, b: any) => 
+    const sortedTransactions = transactions.value.sort((a: Transaction, b: Transaction) => 
       new Date(b.date).getTime() - new Date(a.date).getTime()
     )
     
@@ -231,11 +244,11 @@ export const useAssetHistory = () => {
     console.log('反推完成，新的資產歷史:', newHistory)
     
     assetHistory.value = newHistory
-    saveAssetHistory()
+    await saveAssetHistory()
   }
 
   // 重置初始設定
-  const resetInitialSetup = () => {
+  const resetInitialSetup = async () => {
     initialSetup.value = {
       initialCash: 0,
       startDate: '',
@@ -243,8 +256,10 @@ export const useAssetHistory = () => {
     }
     assetHistory.value = []
     
-    localStorage.removeItem('initial_setup')
-    localStorage.removeItem('asset_history')
+    // Use secure storage removeItem instead of direct localStorage access
+    const { removeItem } = useSecureStorage()
+    removeItem('initial_setup')
+    removeItem('asset_history')
   }
 
   // 計算資產變化趨勢

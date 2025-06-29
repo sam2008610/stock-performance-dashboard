@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { useSecureStorage } from '~/composables/useSecureStorage'
 
 export interface StockPrice {
   symbol: string
@@ -31,6 +32,8 @@ function getNameCacheKey(symbol: string) {
 }
 
 export const useStockPrice = () => {
+  const { getItem, setItem, removeItem } = useSecureStorage()
+
   // 重置所有快取
   const clearCache = async () => {
     console.log('正在清除股票快取...')
@@ -57,7 +60,7 @@ export const useStockPrice = () => {
     }
     
     keysToRemove.forEach(key => {
-      localStorage.removeItem(key)
+      removeItem(key)
     })
     
     console.log(`已清除 ${keysToRemove.length} 個快取項目`)
@@ -116,14 +119,8 @@ export const useStockPrice = () => {
   const getStockName = async (symbol: string): Promise<string | null> => {
     const cacheKey = getNameCacheKey(symbol)
     const today = getTodayString()
-    let cached: { name: string, date: string } | null = null
     
-    try {
-      const raw = localStorage.getItem(cacheKey)
-      if (raw) {
-        cached = JSON.parse(raw)
-      }
-    } catch {}
+    const cached = await getItem<{ name: string, date: string }>(cacheKey)
 
     if (cached && cached.date === today && cached.name) {
       stockNames.value.set(symbol, cached.name)
@@ -134,9 +131,7 @@ export const useStockPrice = () => {
     const name = await fetchStockName(symbol)
     if (name) {
       stockNames.value.set(symbol, name)
-      try {
-        localStorage.setItem(cacheKey, JSON.stringify({ name, date: today }))
-      } catch {}
+      await setItem(cacheKey, { name, date: today })
       return name
     }
     return null
@@ -152,13 +147,8 @@ export const useStockPrice = () => {
   const getStockPrice = async (symbol: string): Promise<StockPrice | null> => {
     const cacheKey = getPriceCacheKey(symbol)
     const today = getTodayString()
-    let cached: { price: StockPrice, date: string } | null = null
-    try {
-      const raw = localStorage.getItem(cacheKey)
-      if (raw) {
-        cached = JSON.parse(raw)
-      }
-    } catch {}
+    
+    const cached = await getItem<{ price: StockPrice, date: string }>(cacheKey)
 
     if (cached && cached.date === today && cached.price) {
       stockPrices.value.set(symbol, cached.price)
@@ -169,9 +159,7 @@ export const useStockPrice = () => {
     const price = await fetchStockPrice(symbol)
     if (price) {
       stockPrices.value.set(symbol, price)
-      try {
-        localStorage.setItem(cacheKey, JSON.stringify({ price, date: today }))
-      } catch {}
+      await setItem(cacheKey, { price, date: today })
       return price
     }
     return null
@@ -184,8 +172,8 @@ export const useStockPrice = () => {
     // 清除該股票的快取
     const priceCacheKey = getPriceCacheKey(symbol)
     const nameCacheKey = getNameCacheKey(symbol)
-    localStorage.removeItem(priceCacheKey)
-    localStorage.removeItem(nameCacheKey)
+    removeItem(priceCacheKey)
+    removeItem(nameCacheKey)
     stockPrices.value.delete(symbol)
     stockNames.value.delete(symbol)
     

@@ -1,5 +1,6 @@
-import { ref, computed } from 'vue'
-import { useStockPrice, type StockPrice } from '~/composables/useStockPrice'
+import { ref, computed, onUnmounted } from 'vue'
+import { useStockPrice } from '~/composables/useStockPrice'
+import { useSecureStorage } from '~/composables/useSecureStorage'
 
 export interface Transaction {
   id: string
@@ -17,26 +18,38 @@ export interface Transaction {
 // 全域狀態，確保所有頁面共享同一個資料狀態
 const transactions = ref<Transaction[]>([])
 let isLoaded = false
+let priceUpdateInterval: NodeJS.Timeout | null = null
 
 export const useTransactions = () => {
-  const { getStockPrices, getStockNames } = useStockPrice()
+  const stockPriceComposable = useStockPrice()
   const realTimeStockPrices = ref<Map<string, number>>(new Map())
+  const { getItem, setItem } = useSecureStorage()
 
   // 從 localStorage 載入資料
-  const loadTransactions = () => {
+  const loadTransactions = async () => {
     if (isLoaded) return // 如果已經載入過，就不重複載入
     
     try {
-      const stored = localStorage.getItem('transactions')
-      if (stored) {
-        const loadedTransactions = JSON.parse(stored)
+      const stored = await getItem<Transaction[]>('transactions')
+      if (stored && Array.isArray(stored)) {
         // 確保向後相容性：為舊資料添加 assetType
-        transactions.value = loadedTransactions.map((t: any) => ({
-          ...t,
-          assetType: t.assetType || 'tw_stock'
+        transactions.value = stored.map((t: Partial<Transaction>) => ({
+          id: t.id || '',
+          type: t.type || 'buy',
+          assetType: t.assetType || 'tw_stock',
+          symbol: t.symbol || '',
+          stockName: t.stockName || '',
+          date: t.date || '',
+          quantity: t.quantity || 0,
+          price: t.price || 0,
+          fee: t.fee || 0,
+          total: t.total || 0
         }))
+      } else {
+        transactions.value = []
       }
       isLoaded = true
+      console.log('交易資料已載入，筆數:', transactions.value.length)
     } catch (error) {
       console.error('載入交易資料失敗:', error)
       transactions.value = []
@@ -51,7 +64,7 @@ export const useTransactions = () => {
     
     console.log('正在更新股票名稱:', symbols)
     
-    const { getStockName } = useStockPrice()
+    const { getStockName } = stockPriceComposable
     let hasUpdates = false
     
     // 逐一取得每支股票的名稱
@@ -75,7 +88,7 @@ export const useTransactions = () => {
     
     // 如果有更新，儲存到 localStorage
     if (hasUpdates) {
-      saveTransactions()
+      await saveTransactions()
       console.log('股票名稱更新完成並已儲存')
     }
   }
@@ -90,7 +103,7 @@ export const useTransactions = () => {
     // 逐一取得每支股票的價格
     for (const symbol of symbols) {
       try {
-        const { getStockPrice } = useStockPrice()
+        const { getStockPrice } = stockPriceComposable
         const stockData = await getStockPrice(symbol)
         if (stockData && stockData.price > 0) {
           realTimeStockPrices.value.set(symbol, stockData.price)
@@ -107,16 +120,21 @@ export const useTransactions = () => {
   }
 
   // 儲存資料到 localStorage
-  const saveTransactions = () => {
+  const saveTransactions = async () => {
     try {
-      localStorage.setItem('transactions', JSON.stringify(transactions.value))
+      const success = await setItem('transactions', transactions.value)
+      if (success) {
+        console.log('交易資料已加密儲存，筆數:', transactions.value.length)
+      } else {
+        console.error('儲存交易資料失敗')
+      }
     } catch (error) {
       console.error('儲存交易資料失敗:', error)
     }
   }
 
   // 新增交易
-  const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
+  const addTransaction = async (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction: Transaction = {
       ...transaction,
       id: Date.now().toString(),
@@ -124,7 +142,7 @@ export const useTransactions = () => {
       assetType: transaction.assetType || 'tw_stock'
     }
     transactions.value.push(newTransaction)
-    saveTransactions()
+    await saveTransactions()
     
     // 只有台股才更新股價和股票名稱
     if (newTransaction.assetType === 'tw_stock') {
@@ -134,11 +152,11 @@ export const useTransactions = () => {
   }
 
   // 刪除交易
-  const deleteTransaction = (id: string) => {
+  const deleteTransaction = async (id: string) => {
     const index = transactions.value.findIndex(t => t.id === id)
     if (index > -1) {
       transactions.value.splice(index, 1)
-      saveTransactions()
+      await saveTransactions()
       updateStockPrices() // 更新股價
     }
   }
@@ -222,7 +240,7 @@ export const useTransactions = () => {
   // 初始化函數，確保資料已載入
   const initialize = async () => {
     if (!isLoaded) {
-      loadTransactions()
+      await loadTransactions()
       await Promise.all([
         updateStockPrices(), // 載入資料後更新股價
         updateStockNames()   // 載入資料後更新股票名稱
@@ -230,17 +248,32 @@ export const useTransactions = () => {
     }
   }
 
-  // 定期更新股價和股票名稱
-  if (typeof window !== 'undefined') {
-    setInterval(async () => {
-      if (isLoaded && transactions.value.length > 0) {
-        await Promise.all([
-          updateStockPrices(),
-          updateStockNames()
-        ])
-      }
-    }, 5 * 60 * 1000) // 每5分鐘更新一次
+  // 啟動定期更新股價和股票名稱
+  const startPriceUpdates = () => {
+    if (typeof window !== 'undefined' && !priceUpdateInterval) {
+      priceUpdateInterval = setInterval(async () => {
+        if (isLoaded && transactions.value.length > 0) {
+          await Promise.all([
+            updateStockPrices(),
+            updateStockNames()
+          ])
+        }
+      }, 5 * 60 * 1000) // 每5分鐘更新一次
+    }
   }
+
+  // 停止定期更新
+  const stopPriceUpdates = () => {
+    if (priceUpdateInterval) {
+      clearInterval(priceUpdateInterval)
+      priceUpdateInterval = null
+    }
+  }
+
+  // 清理資源
+  onUnmounted(() => {
+    stopPriceUpdates()
+  })
 
   // 更新投資組合
   const updatePortfolio = () => {
@@ -261,7 +294,9 @@ export const useTransactions = () => {
     initialize,
     updateStockPrices,
     updateStockNames,
-    updatePortfolio
+    updatePortfolio,
+    startPriceUpdates,
+    stopPriceUpdates
   }
 }
 

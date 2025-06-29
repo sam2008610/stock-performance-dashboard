@@ -23,6 +23,9 @@
               <NuxtLink to="/add" class="text-gray-900 dark:text-[#f8f8f2] inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-[#bd93f9] transition-colors duration-200">
                 新增交易
               </NuxtLink>
+              <NuxtLink to="/settings" class="text-gray-900 dark:text-[#f8f8f2] inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-[#bd93f9] transition-colors duration-200">
+                設定
+              </NuxtLink>
             </div>
           </div>
           

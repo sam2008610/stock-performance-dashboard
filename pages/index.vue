@@ -47,8 +47,8 @@
           <p class="text-3xl font-extrabold text-gray-900 dark:text-[#50fa7b]">NT$ {{ currentAssets?.cash?.toLocaleString() || '0' }}</p>
         </div>
         <div class="rounded-xl bg-gradient-to-br from-[#ff79c6]/10 to-[#50fa7b]/10 p-6 flex flex-col items-start shadow">
-          <h3 class="text-lg font-semibold text-[#ff79c6] mb-2">總資產</h3>
-          <p class="text-3xl font-extrabold text-gray-900 dark:text-[#ff79c6]">NT$ {{ (currentAssets?.total || 0).toLocaleString() }}</p>
+          <h3 class="text-lg font-semibold text-[#ff79c6] mb-2">投資價值</h3>
+          <p class="text-3xl font-extrabold text-gray-900 dark:text-[#ff79c6]">NT$ {{ currentValue.toLocaleString() }}</p>
         </div>
       </div>
     </div>
@@ -74,17 +74,16 @@
           </thead>
           <tbody>
             <tr v-for="transaction in recentTransactions" :key="transaction.id" class="hover:bg-[#f3f4f6] dark:hover:bg-[#282a36] transition">
-              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ transaction.date }}</td>
-              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ transaction.symbol }}</td>
-              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ transaction.stockName }}</td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]" v-text="transaction.date"></td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]" v-text="transaction.symbol"></td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]" v-text="transaction.stockName"></td>
               <td class="px-6 py-4">
-                <span :class="transaction.type === 'buy' ? 'text-green-600 dark:text-[#50fa7b]' : 'text-red-600 dark:text-[#ff5555]'">
-                  {{ transaction.type === 'buy' ? '買入' : '賣出' }}
+                <span :class="transaction.type === 'buy' ? 'text-green-600 dark:text-[#50fa7b]' : 'text-red-600 dark:text-[#ff5555]'" v-text="transaction.type === 'buy' ? '買入' : '賣出'">
                 </span>
               </td>
-              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ transaction.quantity }}</td>
-              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">NT$ {{ transaction.price }}</td>
-              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">NT$ {{ transaction.total.toLocaleString() }}</td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]" v-text="transaction.quantity"></td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">NT$ <span v-text="transaction.price"></span></td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">NT$ <span v-text="transaction.total.toLocaleString()"></span></td>
             </tr>
           </tbody>
         </table>
@@ -117,7 +116,7 @@ const isClearing = ref(false)
 
 // 檢查是否需要初始設定
 onMounted(async () => {
-  loadAssetHistory()
+  await loadAssetHistory()
   
   // 如果還沒完成初始設定，導向設定頁面
   if (!initialSetup.value.isCompleted) {

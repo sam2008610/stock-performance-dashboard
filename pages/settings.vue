@@ -21,7 +21,7 @@
                 當前現金餘額
               </label>
               <div class="text-2xl font-bold text-green-600 dark:text-green-400">
-                NT$ {{ currentAssets?.cash?.toLocaleString() || '0' }}
+                NT$ <span v-text="currentAssets?.cash?.toLocaleString() || '0'"></span>
               </div>
             </div>
             
@@ -39,7 +39,7 @@
             
             <div v-if="cashDifference !== 0" class="p-3 rounded-lg" :class="cashDifference > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'">
               <div class="text-sm font-medium" :class="cashDifference > 0 ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200'">
-                差異: {{ cashDifference > 0 ? '+' : '' }}NT$ {{ cashDifference.toLocaleString() }}
+                差異: <span v-text="(cashDifference > 0 ? '+' : '') + 'NT$ ' + cashDifference.toLocaleString()"></span>
               </div>
             </div>
             
@@ -72,7 +72,7 @@
               :disabled="isRebuilding"
               class="w-full px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {{ isRebuilding ? '重建中...' : '重建資產歷史' }}
+              <span v-text="isRebuilding ? '重建中...' : '重建資產歷史'"></span>
             </button>
           </div>
         </div>
@@ -94,7 +94,7 @@
                   目前現金餘額
                 </label>
                 <div class="text-lg font-semibold text-gray-900 dark:text-white">
-                  NT$ {{ initialSetup?.initialCash?.toLocaleString() || '0' }}
+                  NT$ <span v-text="initialSetup?.initialCash?.toLocaleString() || '0'"></span>
                 </div>
               </div>
               <div>
@@ -102,7 +102,7 @@
                   開始日期
                 </label>
                 <div class="text-lg font-semibold text-gray-900 dark:text-white">
-                  {{ initialSetup?.startDate || '未設定' }}
+                  <span v-text="initialSetup?.startDate || '未設定'"></span>
                 </div>
               </div>
             </div>
@@ -132,7 +132,7 @@
                   歷史記錄數
                 </label>
                 <div class="text-lg font-semibold text-gray-900 dark:text-white">
-                  {{ assetHistory.length }} 筆
+                  <span v-text="assetHistory.length"></span> 筆
                 </div>
               </div>
               <div>
@@ -140,7 +140,7 @@
                   追蹤天數
                 </label>
                 <div class="text-lg font-semibold text-gray-900 dark:text-white">
-                  {{ trackingDays }} 天
+                  <span v-text="trackingDays"></span> 天
                 </div>
               </div>
             </div>
@@ -151,13 +151,13 @@
                 <div>
                   <span class="text-gray-500 dark:text-gray-400">最低:</span>
                   <span class="font-semibold text-gray-900 dark:text-white ml-1">
-                    NT$ {{ minTotal.toLocaleString() }}
+                    NT$ <span v-text="minTotal.toLocaleString()"></span>
                   </span>
                 </div>
                 <div>
                   <span class="text-gray-500 dark:text-gray-400">最高:</span>
                   <span class="font-semibold text-gray-900 dark:text-white ml-1">
-                    NT$ {{ maxTotal.toLocaleString() }}
+                    NT$ <span v-text="maxTotal.toLocaleString()"></span>
                   </span>
                 </div>
               </div>

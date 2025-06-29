@@ -64,19 +64,17 @@
           </thead>
           <tbody>
             <tr v-for="stock in portfolio" :key="stock.symbol" class="hover:bg-[#f3f4f6] dark:hover:bg-[#282a36] transition">
-              <td class="px-6 py-4 font-mono text-base text-gray-900 dark:text-[#f8f8f2]">{{ stock.symbol }}</td>
+              <td class="px-6 py-4 font-mono text-base text-gray-900 dark:text-[#f8f8f2]" v-text="stock.symbol"></td>
               <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">
                 <NuxtLink 
                   :to="`/stock/${stock.symbol}`"
                   class="hover:text-[#8b5cf6] dark:hover:text-[#50fa7b] transition-colors cursor-pointer"
                 >
-                  {{ stock.stockName }}
+                  <span v-text="stock.stockName"></span>
                 </NuxtLink>
               </td>
               <td class="px-6 py-4">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold" :class="getAssetTypeClass(stock.assetType)">
-                  {{ getAssetTypeName(stock.assetType) }}
-                </span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold" :class="getAssetTypeClass(stock.assetType)" v-text="getAssetTypeName(stock.assetType)"></span>
               </td>
               <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ stock.quantity }}</td>
               <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ formatCurrency(stock.avgCost, stock.assetType) }}</td>
@@ -264,7 +262,7 @@ ChartJS.register(
   TimeScale
 )
 
-const { portfolio, transactions, initialize, updateStockPrices, updateStockNames } = useTransactions()
+const { portfolio, initialize, updateStockPrices, updateStockNames } = useTransactions()
 const { clearCache } = useStockPrice()
 const { assetHistory, initialSetup, loadAssetHistory, currentAssets, getStockHistory } = useAssetHistory()
 

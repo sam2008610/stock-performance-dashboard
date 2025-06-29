@@ -19,8 +19,7 @@
         <h2 class="text-3xl font-extrabold tracking-tight mb-2 transition-colors duration-300 bg-gradient-to-r from-emerald-600 to-green-600 dark:from-emerald-400 dark:to-green-400 bg-clip-text text-transparent" v-else>
           資產賣出
         </h2>
-        <p class="text-gray-600 dark:text-gray-400">
-          {{ form.type === 'buy' ? '建立您的投資部位' : '實現您的投資收益' }}
+        <p class="text-gray-600 dark:text-gray-400" v-text="form.type === 'buy' ? '建立您的投資部位' : '實現您的投資收益'">
         </p>
       </div>
       <form @submit.prevent="handleSubmit" class="space-y-8">
@@ -67,7 +66,7 @@
         <!-- 股票搜尋 -->
         <div class="space-y-2">
           <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-            {{ getAssetLabel() }}搜尋
+            <span v-text="getAssetLabel()"></span>搜尋
           </label>
           <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -79,8 +78,8 @@
               type="text" 
               v-model="searchQuery"
               @input="onSearchInput"
-              @focus="showSearchResults = true"
-              @blur="handleSearchBlur"
+              @blur="validateSymbolInput"
+              @focus="showSearchResults = true; clearSymbolError()"
               class="block w-full pl-12 pr-12 py-4 rounded-xl border-0 ring-1 ring-inset transition-all duration-200 placeholder:text-gray-400 focus:ring-2 focus:ring-inset"
               :class="[
                 'bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100',
@@ -88,7 +87,7 @@
                   'ring-red-200 dark:ring-red-700 focus:ring-red-500 dark:focus:ring-red-400' : 
                   'ring-emerald-200 dark:ring-emerald-700 focus:ring-emerald-500 dark:focus:ring-emerald-400',
                 {
-                  'ring-red-300 dark:ring-red-600': symbolError,
+                  'ring-red-300 dark:ring-red-600': symbolError || validation.symbol.error,
                   'ring-green-300 dark:ring-green-600': symbolValid
                 }
               ]"
@@ -124,11 +123,11 @@
                 <div class="flex items-center space-x-3">
                   <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
                        :class="form.type === 'buy' ? 'bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400' : 'bg-emerald-100 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400'">
-                    {{ result.symbol.slice(0, 2) }}
+                    <span v-text="result.symbol.slice(0, 2)"></span>
                   </div>
                   <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ result.symbol }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ result.name }}</p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100" v-text="result.symbol"></p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 truncate" v-text="result.name"></p>
                   </div>
                 </div>
               </div>
@@ -137,7 +136,13 @@
           
           <!-- 狀態訊息 -->
           <div class="min-h-[1.5rem]">
-            <p v-if="symbolError" class="text-sm text-red-600 dark:text-red-400 flex items-center space-x-1">
+            <p v-if="validation.symbol.error" class="text-sm text-red-600 dark:text-red-400 flex items-center space-x-1">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              <span v-text="validation.symbol.message"></span>
+            </p>
+            <p v-else-if="symbolError" class="text-sm text-red-600 dark:text-red-400 flex items-center space-x-1">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
               </svg>
@@ -148,13 +153,13 @@
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
               </svg>
-              <span>{{ form.symbol }} - {{ stockName }}</span>
+              <span v-text="form.symbol + ' - ' + stockName"></span>
             </p>
             <p v-if="balanceError" class="text-sm text-red-600 dark:text-red-400 flex items-center space-x-1">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
               </svg>
-              <span>{{ balanceErrorMessage }}</span>
+              <span v-text="balanceErrorMessage"></span>
             </p>
           </div>
         </div>
@@ -169,10 +174,22 @@
             <input 
               type="date" 
               v-model="form.date"
-              class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset ring-gray-200 dark:ring-[#6272a4] bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 transition-all duration-200 focus:ring-2 focus:ring-inset"
-              :class="form.type === 'buy' ? 'focus:ring-red-500 dark:focus:ring-red-400' : 'focus:ring-emerald-500 dark:focus:ring-emerald-400'"
+              @blur="validateDate"
+              @focus="clearDateError"
+              class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset transition-all duration-200 focus:ring-2 focus:ring-inset bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100"
+              :class="[
+                form.type === 'buy' ? 'focus:ring-red-500 dark:focus:ring-red-400' : 'focus:ring-emerald-500 dark:focus:ring-emerald-400',
+                validation.date.error ? 'ring-red-300 dark:ring-red-600' : 'ring-gray-200 dark:ring-[#6272a4]'
+              ]"
+              :max="maxDate"
               required
             >
+            <p v-if="validation.date.error" class="text-sm text-red-600 dark:text-red-400 flex items-center space-x-1 mt-1">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              <span v-text="validation.date.message"></span>
+            </p>
           </div>
 
           <!-- 數量 -->
@@ -180,51 +197,87 @@
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
               數量
               <span v-if="form.type === 'sell' && availableShares > 0" class="text-xs font-normal text-gray-500 dark:text-gray-400">
-                (可賣出: {{ availableShares }} 股)
+                (可賣出: <span v-text="availableShares"></span> 股)
               </span>
             </label>
             <input 
               type="number" 
               v-model="form.quantity"
-              @input="validateQuantity"
-              class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset ring-gray-200 dark:ring-[#6272a4] bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 transition-all duration-200 focus:ring-2 focus:ring-inset"
-              :class="form.type === 'buy' ? 'focus:ring-red-500 dark:focus:ring-red-400' : 'focus:ring-emerald-500 dark:focus:ring-emerald-400'"
+              @input="validateQuantityInput"
+              @blur="validateQuantity"
+              @focus="clearQuantityError"
+              class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset transition-all duration-200 focus:ring-2 focus:ring-inset bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100"
+              :class="[
+                form.type === 'buy' ? 'focus:ring-red-500 dark:focus:ring-red-400' : 'focus:ring-emerald-500 dark:focus:ring-emerald-400',
+                validation.quantity.error ? 'ring-red-300 dark:ring-red-600' : 'ring-gray-200 dark:ring-[#6272a4]'
+              ]"
               min="1"
+              step="1"
               :max="form.type === 'sell' ? availableShares : undefined"
               required
             >
+            <p v-if="validation.quantity.error" class="text-sm text-red-600 dark:text-red-400 flex items-center space-x-1 mt-1">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              <span v-text="validation.quantity.message"></span>
+            </p>
           </div>
 
           <!-- 價格 -->
           <div class="space-y-2">
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-              價格 ({{ getPriceCurrency() }})
+              價格 (<span v-text="getPriceCurrency()"></span>)
             </label>
             <input 
               type="number" 
               v-model="form.price"
-              class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset ring-gray-200 dark:ring-[#6272a4] bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 transition-all duration-200 focus:ring-2 focus:ring-inset"
-              :class="form.type === 'buy' ? 'focus:ring-red-500 dark:focus:ring-red-400' : 'focus:ring-emerald-500 dark:focus:ring-emerald-400'"
+              @input="validatePriceInput"
+              @blur="validatePrice"
+              @focus="clearPriceError"
+              class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset transition-all duration-200 focus:ring-2 focus:ring-inset bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100"
+              :class="[
+                form.type === 'buy' ? 'focus:ring-red-500 dark:focus:ring-red-400' : 'focus:ring-emerald-500 dark:focus:ring-emerald-400',
+                validation.price.error ? 'ring-red-300 dark:ring-red-600' : 'ring-gray-200 dark:ring-[#6272a4]'
+              ]"
               min="0"
               step="0.01"
               required
             >
+            <p v-if="validation.price.error" class="text-sm text-red-600 dark:text-red-400 flex items-center space-x-1 mt-1">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              <span v-text="validation.price.message"></span>
+            </p>
           </div>
 
           <!-- 手續費 -->
           <div class="space-y-2">
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-              手續費 ({{ getPriceCurrency() }})
+              手續費 (<span v-text="getPriceCurrency()"></span>)
             </label>
             <input 
               type="number" 
               v-model="form.fee"
-              class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset ring-gray-200 dark:ring-[#6272a4] bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 transition-all duration-200 focus:ring-2 focus:ring-inset"
-              :class="form.type === 'buy' ? 'focus:ring-red-500 dark:focus:ring-red-400' : 'focus:ring-emerald-500 dark:focus:ring-emerald-400'"
+              @input="validateFeeInput"
+              @blur="validateFee"
+              @focus="clearFeeError"
+              class="block w-full px-4 py-3 rounded-xl border-0 ring-1 ring-inset transition-all duration-200 focus:ring-2 focus:ring-inset bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100"
+              :class="[
+                form.type === 'buy' ? 'focus:ring-red-500 dark:focus:ring-red-400' : 'focus:ring-emerald-500 dark:focus:ring-emerald-400',
+                validation.fee.error ? 'ring-red-300 dark:ring-red-600' : 'ring-gray-200 dark:ring-[#6272a4]'
+              ]"
               min="0"
               step="0.01"
               required
             >
+            <p v-if="validation.fee.error" class="text-sm text-red-600 dark:text-red-400 flex items-center space-x-1 mt-1">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              <span v-text="validation.fee.message"></span>
+            </p>
           </div>
         </div>
 
@@ -236,7 +289,7 @@
             :class="form.type === 'buy' ? 
               'bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 focus:ring-red-500 shadow-lg shadow-red-500/25' : 
               'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 focus:ring-emerald-500 shadow-lg shadow-emerald-500/25'"
-            :disabled="!canSubmit"
+:disabled="!canSubmit || hasValidationErrors"
           >
             <span class="flex items-center justify-center space-x-2">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -292,6 +345,25 @@ const stockListLoaded = ref(false)
 const balanceError = ref(false)
 const balanceErrorMessage = ref('')
 const availableShares = ref(0)
+
+// 綜合驗證狀態
+const validation = ref({
+  symbol: { error: false, message: '' },
+  date: { error: false, message: '' },
+  quantity: { error: false, message: '' },
+  price: { error: false, message: '' },
+  fee: { error: false, message: '' }
+})
+
+// 最大日期（今天）
+const maxDate = computed(() => {
+  return new Date().toISOString().split('T')[0]
+})
+
+// 是否有驗證錯誤
+const hasValidationErrors = computed(() => {
+  return Object.values(validation.value).some(field => field.error)
+})
 
 // 資產類型對應的搜尋清單
 const assetSearchLists = {
@@ -386,6 +458,15 @@ const getPriceCurrency = () => {
 
 // 檢查是否可以提交表單
 const canSubmit = computed(() => {
+  // 基本表單欄位檢查
+  const hasRequiredFields = form.value.symbol.trim() !== '' && 
+                           form.value.date && 
+                           form.value.quantity > 0 && 
+                           form.value.price > 0 && 
+                           form.value.fee >= 0
+  
+  if (!hasRequiredFields) return false
+  
   if (form.value.assetType === 'tw_stock') {
     return symbolValid.value && !balanceError.value
   } else {
@@ -629,26 +710,8 @@ const validateSymbol = async (symbol) => {
   }
 }
 
-// 驗證數量
-const validateQuantity = () => {
-  if (form.value.type === 'sell' && form.value.symbol) {
-    const quantity = parseInt(form.value.quantity) || 0
-    
-    if (quantity > availableShares.value) {
-      balanceError.value = true
-      balanceErrorMessage.value = `數量超過可賣出股數 (${availableShares.value} 股)`
-    } else if (quantity <= 0) {
-      balanceError.value = true
-      balanceErrorMessage.value = '數量必須大於 0'
-    } else {
-      balanceError.value = false
-      balanceErrorMessage.value = ''
-    }
-  } else {
-    balanceError.value = false
-    balanceErrorMessage.value = ''
-  }
-}
+// 驗證數量（簡單版本，被更完整版本替代）
+// 移除了重複的 validateQuantity 函數
 
 // 交易類型改變時的處理
 const onTypeChange = () => {
@@ -677,6 +740,9 @@ const onAssetTypeChange = () => {
   balanceError.value = false
   balanceErrorMessage.value = ''
   availableShares.value = 0
+  
+  // 清除所有驗證錯誤
+  clearAllValidationErrors()
 }
 
 // 處理搜尋框失焦
@@ -687,48 +753,381 @@ const handleSearchBlur = () => {
   }, 200)
 }
 
+// === 驗證函數 ===
+
+// 清除各欄位錯誤
+const clearSymbolError = () => {
+  validation.value.symbol = { error: false, message: '' }
+}
+
+const clearDateError = () => {
+  validation.value.date = { error: false, message: '' }
+}
+
+const clearQuantityError = () => {
+  validation.value.quantity = { error: false, message: '' }
+}
+
+const clearPriceError = () => {
+  validation.value.price = { error: false, message: '' }
+}
+
+const clearFeeError = () => {
+  validation.value.fee = { error: false, message: '' }
+}
+
+// 清除所有驗證錯誤
+const clearAllValidationErrors = () => {
+  validation.value = {
+    symbol: { error: false, message: '' },
+    date: { error: false, message: '' },
+    quantity: { error: false, message: '' },
+    price: { error: false, message: '' },
+    fee: { error: false, message: '' }
+  }
+}
+
+// 輸入淨化函數
+const sanitizeInput = (value, type = 'text') => {
+  if (!value) return ''
+  
+  switch (type) {
+    case 'number':
+      // 移除非數字字符（保留小數點和負號）
+      return value.toString().replace(/[^0-9.-]/g, '')
+    case 'symbol':
+      // 移除特殊字符，只保留字母數字
+      return value.toString().replace(/[^a-zA-Z0-9]/g, '').toUpperCase()
+    default:
+      // 基本 HTML 編碼
+      return value.toString().replace(/[<>"'&]/g, (match) => {
+        const htmlEntities = {
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+          '&': '&amp;'
+        }
+        return htmlEntities[match]
+      })
+  }
+}
+
+// 台股股票代碼格式驗證
+const validateTaiwanStockSymbol = (symbol) => {
+  if (!symbol) return false
+  
+  // 台股代碼應為 4-6 位數字
+  const pattern = /^\d{4,6}$/
+  return pattern.test(symbol)
+}
+
+// 股票代碼驗證
+const validateSymbolInput = () => {
+  const query = searchQuery.value.trim()
+  
+  if (!query) {
+    validation.value.symbol = { error: true, message: '請輸入' + getAssetLabel() + '代碼' }
+    return false
+  }
+  
+  // 淨化輸入
+  const sanitized = sanitizeInput(query, form.value.assetType === 'tw_stock' ? 'symbol' : 'text')
+  if (sanitized !== query) {
+    searchQuery.value = sanitized
+  }
+  
+  // 台股特殊驗證
+  if (form.value.assetType === 'tw_stock') {
+    const symbolMatch = query.match(/^\d+/)
+    const symbol = symbolMatch ? symbolMatch[0] : ''
+    
+    if (!validateTaiwanStockSymbol(symbol)) {
+      validation.value.symbol = { error: true, message: '台股代碼格式錯誤，應為 4-6 位數字' }
+      return false
+    }
+  }
+  
+  clearSymbolError()
+  return true
+}
+
+// 日期驗證
+const validateDate = () => {
+  if (!form.value.date) {
+    validation.value.date = { error: true, message: '請選擇交易日期' }
+    return false
+  }
+  
+  const selectedDate = new Date(form.value.date)
+  const today = new Date()
+  today.setHours(23, 59, 59, 999) // 設定為當天最晚時間
+  
+  if (selectedDate > today) {
+    validation.value.date = { error: true, message: '交易日期不能晚於今天' }
+    return false
+  }
+  
+  // 檢查是否為有效日期
+  if (isNaN(selectedDate.getTime())) {
+    validation.value.date = { error: true, message: '請選擇有效的日期' }
+    return false
+  }
+  
+  clearDateError()
+  return true
+}
+
+// 數量驗證（輸入時）
+const validateQuantityInput = () => {
+  const quantity = form.value.quantity
+  
+  // 淨化輸入
+  const sanitized = sanitizeInput(quantity, 'number')
+  if (sanitized !== quantity.toString()) {
+    form.value.quantity = parseFloat(sanitized) || 0
+  }
+  
+  // 即時檢查基本格式
+  if (quantity && (quantity < 0 || !Number.isInteger(Number(quantity)))) {
+    validation.value.quantity = { error: true, message: '數量必須為正整數' }
+    return false
+  }
+  
+  clearQuantityError()
+  return true
+}
+
+// 數量驗證（完整）
+const validateQuantity = () => {
+  const quantity = parseInt(form.value.quantity)
+  
+  if (!quantity || quantity <= 0) {
+    validation.value.quantity = { error: true, message: '數量必須大於 0' }
+    return false
+  }
+  
+  if (!Number.isInteger(quantity)) {
+    validation.value.quantity = { error: true, message: '數量必須為整數' }
+    return false
+  }
+  
+  // 最大數量限制（防止意外輸入過大數值）
+  const maxQuantity = 1000000
+  if (quantity > maxQuantity) {
+    validation.value.quantity = { error: true, message: `數量不能超過 ${maxQuantity.toLocaleString()}` }
+    return false
+  }
+  
+  // 賣出時檢查可用股數
+  if (form.value.type === 'sell' && form.value.symbol) {
+    if (quantity > availableShares.value) {
+      validation.value.quantity = { error: true, message: `數量超過可賣出股數 (${availableShares.value} 股)` }
+      balanceError.value = true
+      balanceErrorMessage.value = `數量超過可賣出股數 (${availableShares.value} 股)`
+      return false
+    }
+  }
+  
+  clearQuantityError()
+  // 如果數量驗證通過，也清除餘額錯誤
+  if (balanceError.value && balanceErrorMessage.value.includes('數量超過可賣出股數')) {
+    balanceError.value = false
+    balanceErrorMessage.value = ''
+  }
+  return true
+}
+
+// 價格驗證（輸入時）
+const validatePriceInput = () => {
+  const price = form.value.price
+  
+  // 淨化輸入
+  const sanitized = sanitizeInput(price, 'number')
+  if (sanitized !== price.toString()) {
+    form.value.price = parseFloat(sanitized) || 0
+  }
+  
+  clearPriceError()
+  return true
+}
+
+// 價格驗證（完整）
+const validatePrice = () => {
+  const price = parseFloat(form.value.price)
+  
+  if (!price || price <= 0) {
+    validation.value.price = { error: true, message: '價格必須大於 0' }
+    return false
+  }
+  
+  if (isNaN(price)) {
+    validation.value.price = { error: true, message: '請輸入有效的價格' }
+    return false
+  }
+  
+  // 根據資產類型設定合理的價格範圍
+  let maxPrice, minPrice
+  
+  switch (form.value.assetType) {
+    case 'tw_stock':
+      minPrice = 0.01
+      maxPrice = 10000 // 台股單股最高約數千元
+      break
+    case 'us_stock':
+      minPrice = 0.01
+      maxPrice = 100000 // 美股可能有高價股如 BRK.A
+      break
+    case 'crypto':
+      minPrice = 0.000001
+      maxPrice = 1000000 // 加密貨幣價格範圍較大
+      break
+    default:
+      minPrice = 0.01
+      maxPrice = 100000
+  }
+  
+  if (price < minPrice) {
+    validation.value.price = { error: true, message: `價格不能低於 ${minPrice}` }
+    return false
+  }
+  
+  if (price > maxPrice) {
+    validation.value.price = { error: true, message: `價格不能超過 ${maxPrice.toLocaleString()}` }
+    return false
+  }
+  
+  clearPriceError()
+  return true
+}
+
+// 手續費驗證（輸入時）
+const validateFeeInput = () => {
+  const fee = form.value.fee
+  
+  // 淨化輸入
+  const sanitized = sanitizeInput(fee, 'number')
+  if (sanitized !== fee.toString()) {
+    form.value.fee = parseFloat(sanitized) || 0
+  }
+  
+  clearFeeError()
+  return true
+}
+
+// 手續費驗證（完整）
+const validateFee = () => {
+  const fee = parseFloat(form.value.fee)
+  
+  if (isNaN(fee) || fee < 0) {
+    validation.value.fee = { error: true, message: '手續費不能為負數' }
+    return false
+  }
+  
+  // 合理的手續費上限檢查
+  const price = parseFloat(form.value.price) || 0
+  const quantity = parseInt(form.value.quantity) || 0
+  const totalValue = price * quantity
+  
+  if (totalValue > 0 && fee > totalValue) {
+    validation.value.fee = { error: true, message: '手續費不能超過交易總額' }
+    return false
+  }
+  
+  // 手續費上限（防止意外輸入）
+  const maxFee = 100000
+  if (fee > maxFee) {
+    validation.value.fee = { error: true, message: `手續費不能超過 ${maxFee.toLocaleString()}` }
+    return false
+  }
+  
+  clearFeeError()
+  return true
+}
+
+// 驗證所有欄位
+const validateAllFields = () => {
+  const results = [
+    validateSymbolInput(),
+    validateDate(),
+    validateQuantity(),
+    validatePrice(),
+    validateFee()
+  ]
+  
+  return results.every(result => result === true)
+}
+
 // 處理表單提交
 const handleSubmit = async () => {
-  if (!canSubmit.value) return
-
-  const total = form.value.quantity * form.value.price + form.value.fee
-  await addTransaction({
-    type: form.value.type,
-    assetType: form.value.assetType,
-    symbol: form.value.symbol.trim(),
-    date: form.value.date,
-    quantity: parseInt(form.value.quantity),
-    price: parseFloat(form.value.price),
-    fee: parseFloat(form.value.fee),
-    total: total,
-    stockName: stockName.value || form.value.symbol.trim()
-  })
-
-  // 更新資產快照
-  if (currentAssets.value) {
-    const currentCash = currentAssets.value.cash
-    const currentInvestment = portfolio.value.reduce((sum, stock) => sum + stock.currentValue, 0)
-    addAssetSnapshot(currentCash, currentInvestment, `新增${form.value.type === 'buy' ? '買入' : '賣出'}交易`)
+  // 執行完整驗證
+  if (!validateAllFields()) {
+    console.log('表單驗證失敗')
+    return
+  }
+  
+  if (!canSubmit.value) {
+    console.log('表單不符合提交條件')
+    return
   }
 
-  // 重置表單
-  form.value = {
-    type: 'buy',
-    assetType: 'tw_stock',
-    symbol: '',
-    date: new Date().toISOString().split('T')[0],
-    quantity: 1,
-    price: 0,
-    fee: 0
-  }
-  searchQuery.value = ''
-  resetSymbolState()
-  balanceError.value = false
-  balanceErrorMessage.value = ''
-  availableShares.value = 0
+  try {
+    // 淨化所有輸入
+    const sanitizedSymbol = sanitizeInput(form.value.symbol, 'symbol')
+    const quantity = parseInt(form.value.quantity)
+    const price = parseFloat(form.value.price)
+    const fee = parseFloat(form.value.fee)
+    
+    // 最終驗證
+    if (quantity <= 0 || price <= 0 || fee < 0) {
+      console.error('數值驗證失敗')
+      return
+    }
+    
+    const total = quantity * price + fee
+    
+    await addTransaction({
+      type: form.value.type,
+      assetType: form.value.assetType,
+      symbol: sanitizedSymbol,
+      date: form.value.date,
+      quantity: quantity,
+      price: price,
+      fee: fee,
+      total: total,
+      stockName: stockName.value || sanitizedSymbol
+    })
 
-  // 導航到交易記錄頁面
-  router.push('/transactions')
+    // 更新資產快照
+    if (currentAssets.value) {
+      const currentCash = currentAssets.value.cash
+      const currentInvestment = portfolio.value.reduce((sum, stock) => sum + stock.currentValue, 0)
+      addAssetSnapshot(currentCash, currentInvestment, `新增${form.value.type === 'buy' ? '買入' : '賣出'}交易`)
+    }
+
+    // 重置表單
+    form.value = {
+      type: 'buy',
+      assetType: 'tw_stock',
+      symbol: '',
+      date: new Date().toISOString().split('T')[0],
+      quantity: 1,
+      price: 0,
+      fee: 0
+    }
+    searchQuery.value = ''
+    resetSymbolState()
+    balanceError.value = false
+    balanceErrorMessage.value = ''
+    availableShares.value = 0
+    clearAllValidationErrors()
+
+    // 導航到交易記錄頁面
+    router.push('/transactions')
+  } catch (error) {
+    console.error('提交交易時發生錯誤:', error)
+    // 這裡可以加入錯誤處理UI邏輯
+  }
 }
 
 onMounted(async () => {

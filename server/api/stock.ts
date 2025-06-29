@@ -3,6 +3,7 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const symbol = query.symbol as string
 
+  // Input validation for stock symbol
   if (!symbol) {
     throw createError({
       statusCode: 400,
@@ -10,8 +11,27 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Sanitize and validate stock symbol format
+  const sanitizedSymbol = symbol.toString().trim()
+  
+  // Taiwan stock symbol validation: numbers only, 4-6 digits
+  if (!/^[0-9]{4,6}$/.test(sanitizedSymbol)) {
+    throw createError({
+      statusCode: 400,
+      message: '股票代碼格式錯誤，請輸入4-6位數字'
+    })
+  }
+
+  // Length validation
+  if (sanitizedSymbol.length > 6) {
+    throw createError({
+      statusCode: 400,
+      message: '股票代碼長度不可超過6位數'
+    })
+  }
+
   try {
-    console.log(`正在查詢股票: ${symbol}`)
+    console.log(`正在查詢股票: ${sanitizedSymbol}`)
     
     let stockName = null
     let stockPrice = null
@@ -27,11 +47,11 @@ export default defineEventHandler(async (event) => {
       const startDate = oneWeekAgo.toISOString().split('T')[0]
       const endDate = today.toISOString().split('T')[0]
       
-      console.log(`查詢價格資料: ${symbol}, 日期範圍: ${startDate} 到 ${endDate}`)
+      console.log(`查詢價格資料: ${sanitizedSymbol}, 日期範圍: ${startDate} 到 ${endDate}`)
       
       // 先嘗試上市股票
       let priceResponse = await fetch(
-        `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=${symbol}&start_date=${startDate}&end_date=${endDate}`,
+        `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=${sanitizedSymbol}&start_date=${startDate}&end_date=${endDate}`,
         {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -49,7 +69,7 @@ export default defineEventHandler(async (event) => {
       if (!priceData?.data || priceData.data.length === 0) {
         console.log('上市股票無資料，嘗試查詢上櫃股票')
         priceResponse = await fetch(
-          `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPriceOTC&data_id=${symbol}&start_date=${startDate}&end_date=${endDate}`,
+          `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPriceOTC&data_id=${sanitizedSymbol}&start_date=${startDate}&end_date=${endDate}`,
           {
             headers: {
               'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -88,7 +108,7 @@ export default defineEventHandler(async (event) => {
     try {
       console.log('查詢上市股票基本資料')
       let stockInfoResponse = await fetch(
-        `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockInfo&data_id=${symbol}`,
+        `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockInfo&data_id=${sanitizedSymbol}`,
         {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -111,7 +131,7 @@ export default defineEventHandler(async (event) => {
       if (!stockName) {
         console.log('上市股票無基本資料，查詢上櫃股票基本資料')
         stockInfoResponse = await fetch(
-          `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockInfoOTC&data_id=${symbol}`,
+          `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockInfoOTC&data_id=${sanitizedSymbol}`,
           {
             headers: {
               'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -138,16 +158,16 @@ export default defineEventHandler(async (event) => {
     // 3. 準備回傳資料
     // 只要有股票名稱或價格其中一個就認為是有效的股票
     if (!stockName && !stockPrice) {
-      console.log(`股票 ${symbol} 查詢失敗: 無名稱也無價格資料`)
+      console.log(`股票 ${sanitizedSymbol} 查詢失敗: 無名稱也無價格資料`)
       throw createError({
         statusCode: 404,
-        message: `找不到股票代碼 ${symbol} 的資料，請確認股票代碼是否正確`
+        message: `找不到股票代碼 ${sanitizedSymbol} 的資料，請確認股票代碼是否正確`
       })
     }
     
     const result = {
-      symbol: symbol,
-      name: stockName || `股票代碼 ${symbol}`,
+      symbol: sanitizedSymbol,
+      name: stockName || `股票代碼 ${sanitizedSymbol}`,
       price: stockPrice || 0,
       change: priceChange,
       changePercent: priceChangePercent,
@@ -165,7 +185,7 @@ export default defineEventHandler(async (event) => {
     console.error('股票查詢錯誤:', error)
     throw createError({
       statusCode: 500,
-      message: `查詢股票 ${symbol} 時發生錯誤: ${error?.message || '未知錯誤'}`
+      message: `查詢股票 ${sanitizedSymbol} 時發生錯誤`
     })
   }
 }) 

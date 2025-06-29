@@ -33,23 +33,21 @@
           </thead>
           <tbody>
             <tr v-for="transaction in sortedTransactions" :key="transaction.id" class="hover:bg-[#f3f4f6] dark:hover:bg-[#282a36] transition">
-              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ formatDate(transaction.date) }}</td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]" v-text="formatDate(transaction.date)"></td>
               <td class="px-6 py-4">
-                <span :class="['px-2 py-1 rounded-full text-xs font-semibold', getAssetTypeStyle(transaction.assetType)]">
-                  {{ getAssetTypeLabel(transaction.assetType) }}
+                <span :class="['px-2 py-1 rounded-full text-xs font-semibold', getAssetTypeStyle(transaction.assetType)]" v-text="getAssetTypeLabel(transaction.assetType)">
                 </span>
               </td>
-              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ transaction.symbol }}</td>
-              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ transaction.stockName }}</td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]" v-text="transaction.symbol"></td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]" v-text="transaction.stockName"></td>
               <td class="px-6 py-4">
-                <span :class="['px-2 py-1 rounded-full text-xs font-semibold', transaction.type === 'buy' ? 'bg-green-100 dark:bg-[#50fa7b]/20 text-green-800 dark:text-[#50fa7b]' : 'bg-red-100 dark:bg-[#ff5555]/20 text-red-800 dark:text-[#ff5555]']">
-                  {{ transaction.type === 'buy' ? '買入' : '賣出' }}
+                <span :class="['px-2 py-1 rounded-full text-xs font-semibold', transaction.type === 'buy' ? 'bg-green-100 dark:bg-[#50fa7b]/20 text-green-800 dark:text-[#50fa7b]' : 'bg-red-100 dark:bg-[#ff5555]/20 text-red-800 dark:text-[#ff5555]']" v-text="transaction.type === 'buy' ? '買入' : '賣出'">
                 </span>
               </td>
-              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ formatPrice(transaction.price, transaction.assetType) }}</td>
-              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ transaction.quantity }}</td>
-              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ formatPrice(transaction.fee, transaction.assetType) }}</td>
-              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ formatPrice(transaction.total, transaction.assetType) }}</td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]" v-text="formatPrice(transaction.price, transaction.assetType)"></td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]" v-text="transaction.quantity"></td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]" v-text="formatPrice(transaction.fee, transaction.assetType)"></td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]" v-text="formatPrice(transaction.total, transaction.assetType)"></td>
               <td class="px-6 py-4 text-right">
                 <button
                   @click="deleteTransaction(transaction.id)"

@@ -17,7 +17,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-blue-100 text-sm font-medium">總交易次數</p>
-            <p class="text-3xl font-bold">{{ totalTransactions }}</p>
+            <p class="text-3xl font-bold" v-text="totalTransactions"></p>
           </div>
           <div class="p-3 bg-white/20 rounded-lg">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,7 +32,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-green-100 text-sm font-medium">近一年交易頻率</p>
-            <p class="text-3xl font-bold">{{ yearlyFrequency.toFixed(1) }}</p>
+            <p class="text-3xl font-bold" v-text="yearlyFrequency.toFixed(1)"></p>
             <p class="text-green-100 text-xs">次/月</p>
           </div>
           <div class="p-3 bg-white/20 rounded-lg">
@@ -48,7 +48,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-purple-100 text-sm font-medium">平均持有時間</p>
-            <p class="text-3xl font-bold">{{ averageHoldingDays }}</p>
+            <p class="text-3xl font-bold" v-text="averageHoldingDays"></p>
             <p class="text-purple-100 text-xs">天</p>
           </div>
           <div class="p-3 bg-white/20 rounded-lg">
@@ -64,7 +64,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-orange-100 text-sm font-medium">交易活躍度</p>
-            <p class="text-3xl font-bold">{{ activityLevel }}</p>
+            <p class="text-3xl font-bold" v-text="activityLevel"></p>
           </div>
           <div class="p-3 bg-white/20 rounded-lg">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,17 +136,17 @@
           </thead>
           <tbody>
             <tr v-for="stock in stockHoldingAnalysis" :key="stock.symbol" class="hover:bg-[#f3f4f6] dark:hover:bg-[#282a36] transition">
-              <td class="px-6 py-4 font-mono text-base text-gray-900 dark:text-[#f8f8f2]">{{ stock.symbol }}</td>
-              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ stock.stockName }}</td>
-              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ stock.firstBuyDate }}</td>
-              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ stock.holdingDays }}</td>
-              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]">{{ stock.transactionCount }}</td>
+              <td class="px-6 py-4 font-mono text-base text-gray-900 dark:text-[#f8f8f2]" v-text="stock.symbol"></td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]" v-text="stock.stockName"></td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]" v-text="stock.firstBuyDate"></td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]" v-text="stock.holdingDays"></td>
+              <td class="px-6 py-4 text-base text-gray-900 dark:text-[#f8f8f2]" v-text="stock.transactionCount"></td>
               <td class="px-6 py-4">
                 <span 
                   class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
                   :class="stock.isHolding ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'"
                 >
-                  {{ stock.isHolding ? '持有中' : '已賣出' }}
+                  <span v-text="stock.isHolding ? '持有中' : '已賣出'"></span>
                 </span>
               </td>
             </tr>
@@ -168,11 +168,11 @@
           <div class="space-y-3">
             <div class="flex justify-between items-center">
               <span class="text-gray-600 dark:text-gray-400">買入交易</span>
-              <span class="font-semibold text-green-600 dark:text-green-400">{{ buyTransactions }} 次 ({{ buyPercentage.toFixed(1) }}%)</span>
+              <span class="font-semibold text-green-600 dark:text-green-400" v-text="`${buyTransactions} 次 (${buyPercentage.toFixed(1)}%)`"></span>
             </div>
             <div class="flex justify-between items-center">
               <span class="text-gray-600 dark:text-gray-400">賣出交易</span>
-              <span class="font-semibold text-red-600 dark:text-red-400">{{ sellTransactions }} 次 ({{ sellPercentage.toFixed(1) }}%)</span>
+              <span class="font-semibold text-red-600 dark:text-red-400" v-text="`${sellTransactions} 次 (${sellPercentage.toFixed(1)}%)`"></span>
             </div>
             <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
               <div 
@@ -192,9 +192,9 @@
         <div class="bg-gray-50 dark:bg-[#282a36] rounded-xl p-6">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">最活躍交易月份</h3>
           <div class="space-y-3">
-            <div v-for="(month, index) in topActiveMonths" :key="month.month" class="flex justify-between items-center">
-              <span class="text-gray-600 dark:text-gray-400">{{ month.monthName }}</span>
-              <span class="font-semibold text-blue-600 dark:text-blue-400">{{ month.count }} 次</span>
+            <div v-for="month in topActiveMonths" :key="month.month" class="flex justify-between items-center">
+              <span class="text-gray-600 dark:text-gray-400" v-text="month.monthName"></span>
+              <span class="font-semibold text-blue-600 dark:text-blue-400" v-text="`${month.count} 次`"></span>
             </div>
           </div>
         </div>
@@ -205,7 +205,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useTransactions } from '~/composables/useTransactions'
+import { useTransactions, type Transaction } from '~/composables/useTransactions'
 import { useTheme } from '~/composables/useTheme'
 import {
   Chart as ChartJS,
@@ -233,7 +233,25 @@ useHead({
   title: '交易行為分析 - 股票投資追蹤器'
 })
 
-const { transactions, portfolio } = useTransactions()
+// 類型定義
+interface StockAnalysisData {
+  symbol: string
+  stockName: string
+  transactions: Transaction[]
+  firstBuyDate: string | null
+  isHolding: boolean
+}
+
+interface StockHoldingResult {
+  symbol: string
+  stockName: string
+  firstBuyDate: string
+  holdingDays: number
+  transactionCount: number
+  isHolding: boolean
+}
+
+const { transactions } = useTransactions()
 const { isDarkMode } = useTheme()
 
 // 分析時間範圍
@@ -281,7 +299,7 @@ const activityLevel = computed(() => {
 
 // 股票持有時間分析
 const stockHoldingAnalysis = computed(() => {
-  const stockMap = new Map()
+  const stockMap = new Map<string, StockAnalysisData>()
   
   // 分析每支股票的交易記錄
   transactions.value.forEach(transaction => {
@@ -297,23 +315,25 @@ const stockHoldingAnalysis = computed(() => {
     }
     
     const stock = stockMap.get(symbol)
-    stock.transactions.push(transaction)
-    
-    // 記錄首次買入日期
-    if (transaction.type === 'buy' && (!stock.firstBuyDate || new Date(transaction.date) < new Date(stock.firstBuyDate))) {
-      stock.firstBuyDate = transaction.date
+    if (stock) {
+      stock.transactions.push(transaction)
+      
+      // 記錄首次買入日期
+      if (transaction.type === 'buy' && (!stock.firstBuyDate || new Date(transaction.date) < new Date(stock.firstBuyDate))) {
+        stock.firstBuyDate = transaction.date
+      }
     }
   })
   
   // 計算每支股票的持有時間和狀態
-  const analysis = Array.from(stockMap.values()).map((stock: any) => {
-    const sortedTransactions = stock.transactions.sort((a: any, b: any) => 
+  const analysis: StockHoldingResult[] = Array.from(stockMap.values()).map((stock: StockAnalysisData) => {
+    const sortedTransactions = stock.transactions.sort((a: Transaction, b: Transaction) => 
       new Date(a.date).getTime() - new Date(b.date).getTime()
     )
     
     // 計算當前是否持有
     let currentQuantity = 0
-    sortedTransactions.forEach((t: any) => {
+    sortedTransactions.forEach((t: Transaction) => {
       if (t.type === 'buy') {
         currentQuantity += t.quantity
       } else {
@@ -324,6 +344,18 @@ const stockHoldingAnalysis = computed(() => {
     const isHolding = currentQuantity > 0
     const firstBuyDate = stock.firstBuyDate
     const now = new Date()
+    
+    if (!firstBuyDate) {
+      return {
+        symbol: stock.symbol,
+        stockName: stock.stockName,
+        firstBuyDate: '-',
+        holdingDays: 0,
+        transactionCount: stock.transactions.length,
+        isHolding
+      }
+    }
+    
     const firstBuy = new Date(firstBuyDate)
     
     // 計算持有天數
@@ -334,7 +366,7 @@ const stockHoldingAnalysis = computed(() => {
     } else {
       // 如果已賣出，計算最後賣出日期
       const lastSellDate = sortedTransactions
-        .filter((t: any) => t.type === 'sell')
+        .filter((t: Transaction) => t.type === 'sell')
         .pop()?.date
       
       if (lastSellDate) {

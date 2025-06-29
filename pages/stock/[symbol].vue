@@ -5,14 +5,14 @@
       <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
         <div class="flex items-center gap-4">
           <div class="w-16 h-16 rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] flex items-center justify-center text-white text-2xl font-bold">
-            {{ stockInfo.symbol?.slice(0, 2) || 'ST' }}
+            <span v-text="stockInfo.symbol?.slice(0, 2) || 'ST'"></span>
           </div>
           <div>
             <h1 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-              {{ stockInfo.symbol }}
+              <span v-text="stockInfo.symbol"></span>
             </h1>
             <p class="text-lg text-gray-600 dark:text-gray-400">
-              {{ stockInfo.name || '載入中...' }}
+              <span v-text="stockInfo.name || '載入中...'"></span>
             </p>
           </div>
         </div>
@@ -67,7 +67,7 @@
               :key="tag"
               class="px-3 py-1 bg-[#8b5cf6]/10 dark:bg-[#8b5cf6]/20 text-[#8b5cf6] dark:text-[#bd93f9] rounded-full text-sm hover:bg-[#8b5cf6]/20 dark:hover:bg-[#8b5cf6]/30 transition-colors flex items-center gap-1"
             >
-              {{ tag }}
+              <span v-text="tag"></span>
               <button
                 @click.stop="removeCustomTag(tag)"
                 class="w-4 h-4 rounded-full bg-[#8b5cf6] text-white text-xs hover:bg-[#7c3aed] transition-colors flex items-center justify-center"

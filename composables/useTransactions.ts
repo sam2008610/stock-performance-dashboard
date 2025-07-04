@@ -151,6 +151,22 @@ export const useTransactions = () => {
     }
   }
 
+  // 批量新增交易（用於CSV匯入）
+  const addTransactions = async (newTransactions: Omit<Transaction, 'id'>[]) => {
+    const transactionsWithId = newTransactions.map(transaction => ({
+      ...transaction,
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      assetType: transaction.assetType || 'tw_stock'
+    }))
+    
+    transactions.value.push(...transactionsWithId)
+    await saveTransactions()
+    
+    // 更新股價和股票名稱
+    updateStockPrices()
+    updateStockNames()
+  }
+
   // 刪除交易
   const deleteTransaction = async (id: string) => {
     const index = transactions.value.findIndex(t => t.id === id)
@@ -290,6 +306,7 @@ export const useTransactions = () => {
     loadTransactions,
     saveTransactions,
     addTransaction,
+    addTransactions,
     deleteTransaction,
     initialize,
     updateStockPrices,

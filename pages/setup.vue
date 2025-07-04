@@ -35,7 +35,7 @@
         <button
           @click="completeSetup"
           :disabled="!isValid"
-          class="w-full px-6 py-4 bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] text-white font-semibold rounded-lg hover:from-[#7c3aed] hover:to-[#0ea5e9] transition disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+          class="w-full px-6 py-4 bg-blue-600 dark:bg-blue-700 text-white font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed text-lg shadow-md"
         >
           完成設定
         </button>

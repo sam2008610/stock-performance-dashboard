@@ -34,18 +34,11 @@
         <button 
           @click="clearCacheAndRefresh"
           :disabled="isClearing"
-          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] text-white font-semibold shadow-lg hover:from-[#7c3aed] hover:to-[#0ea5e9] transition disabled:opacity-50"
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-slate-600 dark:bg-slate-700 text-white font-medium shadow-md hover:bg-slate-700 dark:hover:bg-slate-600 transition disabled:opacity-50"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582M20 20v-5h-.581M5 9A7 7 0 0112 5a7 7 0 017 7v3m-7 7a7 7 0 01-7-7v-3m7 7a7 7 0 007-7"/></svg>
           {{ isClearing ? '清除中...' : '清除快取' }}
         </button>
-        <NuxtLink 
-          to="/settings"
-          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#10b981] to-[#06b6d4] text-white font-semibold shadow-lg hover:from-[#059669] hover:to-[#0ea5e9] transition"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          設定
-        </NuxtLink>
       </div>
       <div class="overflow-x-auto rounded-xl border border-gray-100 dark:border-[#6272a4] bg-white/70 dark:bg-[#23272f]/70">
         <table class="min-w-full text-sm text-left">
@@ -105,8 +98,8 @@
               :class="[
                 'px-3 py-2 rounded-md text-sm font-medium transition-all duration-200',
                 timeRange === 6 
-                  ? 'bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] text-white shadow' 
-                  : 'text-gray-600 dark:text-[#8be9fd] hover:text-[#8b5cf6] dark:hover:text-[#50fa7b]'
+                  ? 'bg-blue-600 dark:bg-blue-700 text-white shadow-md' 
+                  : 'text-gray-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400'
               ]"
             >
               6個月
@@ -116,8 +109,8 @@
               :class="[
                 'px-3 py-2 rounded-md text-sm font-medium transition-all duration-200',
                 timeRange === 12 
-                  ? 'bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] text-white shadow' 
-                  : 'text-gray-600 dark:text-[#8be9fd] hover:text-[#8b5cf6] dark:hover:text-[#50fa7b]'
+                  ? 'bg-blue-600 dark:bg-blue-700 text-white shadow-md' 
+                  : 'text-gray-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400'
               ]"
             >
               12個月
@@ -127,22 +120,22 @@
               :class="[
                 'px-3 py-2 rounded-md text-sm font-medium transition-all duration-200',
                 timeRange === 24 
-                  ? 'bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] text-white shadow' 
-                  : 'text-gray-600 dark:text-[#8be9fd] hover:text-[#8b5cf6] dark:hover:text-[#50fa7b]'
+                  ? 'bg-blue-600 dark:bg-blue-700 text-white shadow-md' 
+                  : 'text-gray-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400'
               ]"
             >
               24個月
             </button>
           </div>
           <!-- 圖表類型切換 -->
-          <div class="flex bg-gray-100 dark:bg-[#282a36] rounded-lg p-1 gap-2">
+          <div class="flex bg-gray-100 dark:bg-slate-800 rounded-lg p-1 gap-2">
             <button
               @click="chartType = 'pie'"
               :class="[
-                'px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200',
+                'px-4 py-2 rounded-md text-sm font-medium transition-all duration-200',
                 chartType === 'pie' 
-                  ? 'bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] text-white shadow' 
-                  : 'text-gray-600 dark:text-[#8be9fd] hover:text-[#8b5cf6] dark:hover:text-[#50fa7b]'
+                  ? 'bg-blue-600 dark:bg-blue-700 text-white shadow-md' 
+                  : 'text-gray-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400'
               ]"
             >
               圓餅圖
@@ -150,14 +143,31 @@
             <button
               @click="chartType = 'area'"
               :class="[
-                'px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200',
+                'px-4 py-2 rounded-md text-sm font-medium transition-all duration-200',
                 chartType === 'area' 
-                  ? 'bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] text-white shadow' 
-                  : 'text-gray-600 dark:text-[#8be9fd] hover:text-[#8b5cf6] dark:hover:text-[#50fa7b]'
+                  ? 'bg-blue-600 dark:bg-blue-700 text-white shadow-md' 
+                  : 'text-gray-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400'
               ]"
             >
               面積圖
             </button>
+          </div>
+          
+          <!-- 投資組合日期選擇 (只在圓餅圖模式顯示) -->
+          <div v-if="chartType === 'pie'" class="flex items-center gap-2">
+            <label class="text-sm font-medium text-gray-600 dark:text-slate-400">選擇日期:</label>
+            <div class="relative">
+              <input
+                type="date"
+                v-model="selectedDate"
+                :max="today"
+                :min="earliestDate"
+                class="px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <svg class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+            </div>
           </div>
         </div>
       </div>
@@ -189,8 +199,8 @@
               :class="[
                 'px-3 py-2 rounded-md text-sm font-medium transition-all duration-200',
                 assetTimeRange === 6 
-                  ? 'bg-gradient-to-r from-[#50fa7b] to-[#ff79c6] text-white shadow' 
-                  : 'text-gray-600 dark:text-[#8be9fd] hover:text-[#50fa7b] dark:hover:text-[#ff79c6]'
+                  ? 'bg-emerald-600 dark:bg-emerald-700 text-white shadow-md' 
+                  : 'text-gray-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400'
               ]"
             >
               6個月
@@ -200,8 +210,8 @@
               :class="[
                 'px-3 py-2 rounded-md text-sm font-medium transition-all duration-200',
                 assetTimeRange === 12 
-                  ? 'bg-gradient-to-r from-[#50fa7b] to-[#ff79c6] text-white shadow' 
-                  : 'text-gray-600 dark:text-[#8be9fd] hover:text-[#50fa7b] dark:hover:text-[#ff79c6]'
+                  ? 'bg-emerald-600 dark:bg-emerald-700 text-white shadow-md' 
+                  : 'text-gray-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400'
               ]"
             >
               12個月
@@ -211,8 +221,8 @@
               :class="[
                 'px-3 py-2 rounded-md text-sm font-medium transition-all duration-200',
                 assetTimeRange === 24 
-                  ? 'bg-gradient-to-r from-[#50fa7b] to-[#ff79c6] text-white shadow' 
-                  : 'text-gray-600 dark:text-[#8be9fd] hover:text-[#50fa7b] dark:hover:text-[#ff79c6]'
+                  ? 'bg-emerald-600 dark:bg-emerald-700 text-white shadow-md' 
+                  : 'text-gray-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400'
               ]"
             >
               24個月
@@ -269,8 +279,13 @@ const { assetHistory, initialSetup, loadAssetHistory, currentAssets, getStockHis
 // 圖表類型切換
 const chartType = ref<'pie' | 'area'>('pie')
 
-// 時間範圍選擇
+// 時間範圍選擇 (用於面積圖)
 const timeRange = ref<6 | 12 | 24>(12)
+
+// 投資組合日期選擇 (用於圓餅圖)
+const selectedDate = ref('')
+const today = new Date().toISOString().split('T')[0]
+const earliestDate = ref('')
 
 // 資產變化趨勢時間範圍
 const assetTimeRange = ref<6 | 12 | 24>(12)
@@ -382,18 +397,69 @@ const generateColors = (count: number) => {
   return (isDarkMode.value ? darkColors : lightColors).slice(0, count)
 }
 
-// 圓餅圖數據
+// 圓餅圖數據 (基於選擇的時間範圍)
 const pieChartData = computed(() => {
   checkTheme() // 每次計算時檢查主題
   
-  // 準備股票數據
-  const stockLabels = portfolio.value.map(stock => stock.stockName || stock.symbol)
-  const stockData = portfolio.value.map(stock => stock.currentValue)
+  if (!assetHistory.value || assetHistory.value.length === 0) {
+    // 如果沒有歷史資料，使用當前數據
+    const stockLabels = portfolio.value.map(stock => stock.stockName || stock.symbol)
+    const stockData = portfolio.value.map(stock => stock.currentValue)
+    const cashValue = currentAssets.value?.cash || 0
+    const labels = cashValue > 0 ? ['現金', ...stockLabels] : stockLabels
+    const data = cashValue > 0 ? [cashValue, ...stockData] : stockData
+    
+    return {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: generateColors(labels.length),
+        borderWidth: 2,
+        borderColor: isDarkMode.value ? '#334155' : '#e5e7eb'
+      }]
+    }
+  }
+  
+  // 根據選擇的日期獲取目標日期
+  const targetDate = selectedDate.value ? new Date(selectedDate.value) : new Date()
+  
+  // 找到最接近目標日期的資產快照
+  const sortedHistory = [...assetHistory.value].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  )
+  
+  let targetSnapshot = sortedHistory.find(snapshot => 
+    new Date(snapshot.date) <= targetDate
+  ) || sortedHistory[sortedHistory.length - 1] // 如果沒找到，使用最早的記錄
+  
+  // 如果還是沒有資料，使用最新的
+  if (!targetSnapshot) {
+    targetSnapshot = sortedHistory[0]
+  }
+  
+  if (!targetSnapshot) {
+    return { labels: [], datasets: [] }
+  }
+  
+  // 解析投資組合數據
+  const portfolioData: Record<string, number> = {}
+  const stockHistory = targetSnapshot.stocks || {}
+  
+  // 加入股票數據
+  Object.entries(stockHistory).forEach(([symbol, stockData]: [string, any]) => {
+    if (stockData && typeof stockData === 'object' && stockData.value > 0) {
+      const stockName = stockData.stockName || symbol
+      portfolioData[stockName] = stockData.value
+    }
+  })
   
   // 加入現金數據
-  const cashValue = currentAssets.value?.cash || 0
-  const labels = cashValue > 0 ? ['現金', ...stockLabels] : stockLabels
-  const data = cashValue > 0 ? [cashValue, ...stockData] : stockData
+  if (targetSnapshot.cash > 0) {
+    portfolioData['現金'] = targetSnapshot.cash
+  }
+  
+  const labels = Object.keys(portfolioData)
+  const data = Object.values(portfolioData)
   
   return {
     labels: labels,
@@ -401,7 +467,7 @@ const pieChartData = computed(() => {
       data: data,
       backgroundColor: generateColors(labels.length),
       borderWidth: 2,
-      borderColor: isDarkMode.value ? '#44475a' : '#e5e7eb' // 根據主題調整邊框顏色
+      borderColor: isDarkMode.value ? '#334155' : '#e5e7eb'
     }]
   }
 })
@@ -1011,7 +1077,19 @@ onMounted(async () => {
   checkTheme()
   
   // 載入資產歷史
-  loadAssetHistory()
+  await loadAssetHistory()
+  
+  // 初始化日期選擇器
+  if (assetHistory.value && assetHistory.value.length > 0) {
+    const sortedHistory = [...assetHistory.value].sort((a, b) => 
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+    )
+    earliestDate.value = sortedHistory[0].date.split('T')[0]
+    selectedDate.value = today // 預設選擇今天
+  } else {
+    earliestDate.value = today
+    selectedDate.value = today
+  }
   
   // 監聽主題變化
   if (typeof window !== 'undefined') {

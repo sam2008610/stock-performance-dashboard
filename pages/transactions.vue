@@ -7,13 +7,26 @@
           <span class="inline-block w-2 h-8 bg-gradient-to-b from-[#8b5cf6] to-[#06b6d4] rounded-full mr-2"></span>
           交易記錄
         </h1>
-        <button
-          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#06b6d4] text-white font-semibold shadow-lg hover:from-[#7c3aed] hover:to-[#0ea5e9] transition"
-          @click="exportCSV"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-          匯出 CSV
-        </button>
+        <div class="flex gap-3">
+          <label class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 dark:bg-emerald-700 text-white font-medium shadow-md hover:bg-emerald-700 dark:hover:bg-emerald-600 transition cursor-pointer">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            匯入 CSV
+            <input 
+              type="file" 
+              accept=".csv" 
+              @change="handleCSVImport" 
+              class="hidden"
+              ref="fileInput"
+            />
+          </label>
+          <button
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 dark:bg-blue-700 text-white font-medium shadow-md hover:bg-blue-700 dark:hover:bg-blue-600 transition"
+            @click="exportCSV"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            匯出 CSV
+          </button>
+        </div>
       </div>
       <div class="overflow-x-auto rounded-xl border border-gray-100 dark:border-[#6272a4] bg-white/70 dark:bg-[#23272f]/70">
         <table class="min-w-full text-sm text-left">
@@ -51,7 +64,7 @@
               <td class="px-6 py-4 text-right">
                 <button
                   @click="deleteTransaction(transaction.id)"
-                  class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#ff5555] to-[#bd93f9] text-white font-semibold shadow hover:from-[#ff79c6] hover:to-[#8be9fd] transition"
+                  class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-600 dark:bg-red-700 text-white font-medium shadow-md hover:bg-red-700 dark:hover:bg-red-600 transition"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                   刪除
@@ -76,7 +89,7 @@ import { useTransactions } from '~/composables/useTransactions'
 import type { Transaction } from '~/composables/useTransactions'
 
 // Get transactions from composable
-const { transactions, deleteTransaction, initialize } = useTransactions()
+const { transactions, deleteTransaction, addTransactions, initialize } = useTransactions()
 
 // Initialize data
 onMounted(async () => {
@@ -152,5 +165,129 @@ function exportCSV() {
   a.click()
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
+}
+
+// CSV 驗證函數
+function validateCSVData(data: any[]): { isValid: boolean; errors: string[] } {
+  const errors: string[] = []
+  const requiredFields = ['type', 'symbol', 'stockName', 'date', 'quantity', 'price', 'fee', 'total']
+  
+  if (!Array.isArray(data) || data.length === 0) {
+    errors.push('CSV 檔案為空或格式不正確')
+    return { isValid: false, errors }
+  }
+
+  data.forEach((row, index) => {
+    // 檢查必要欄位
+    requiredFields.forEach(field => {
+      if (!(field in row) || row[field] === undefined || row[field] === '') {
+        errors.push(`第 ${index + 1} 行缺少必要欄位: ${field}`)
+      }
+    })
+
+    // 檢查交易類型
+    if (row.type && !['buy', 'sell'].includes(row.type)) {
+      errors.push(`第 ${index + 1} 行的交易類型無效: ${row.type}`)
+    }
+
+    // 檢查資產類型
+    if (row.assetType && !['tw_stock', 'us_stock', 'crypto', 'bond', 'financial_product'].includes(row.assetType)) {
+      errors.push(`第 ${index + 1} 行的資產類型無效: ${row.assetType}`)
+    }
+
+    // 檢查數字欄位
+    const numberFields = ['quantity', 'price', 'fee', 'total']
+    numberFields.forEach(field => {
+      if (row[field] && isNaN(Number(row[field]))) {
+        errors.push(`第 ${index + 1} 行的 ${field} 不是有效數字: ${row[field]}`)
+      }
+    })
+
+    // 檢查日期格式
+    if (row.date && isNaN(Date.parse(row.date))) {
+      errors.push(`第 ${index + 1} 行的日期格式無效: ${row.date}`)
+    }
+  })
+
+  return { isValid: errors.length === 0, errors }
+}
+
+// 解析 CSV 檔案
+function parseCSV(csvText: string): any[] {
+  const lines = csvText.split('\n').filter(line => line.trim())
+  if (lines.length < 2) return []
+
+  const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim())
+  const data: any[] = []
+
+  for (let i = 1; i < lines.length; i++) {
+    const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim())
+    if (values.length === headers.length) {
+      const row: any = {}
+      headers.forEach((header, index) => {
+        row[header] = values[index]
+      })
+      data.push(row)
+    }
+  }
+
+  return data
+}
+
+// 匯入 CSV 功能
+async function handleCSVImport(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  
+  if (!file) return
+
+  if (!file.name.toLowerCase().endsWith('.csv')) {
+    alert('請選擇 CSV 檔案')
+    return
+  }
+
+  try {
+    const text = await file.text()
+    const parsedData = parseCSV(text)
+    
+    if (parsedData.length === 0) {
+      alert('CSV 檔案為空或格式不正確')
+      return
+    }
+
+    // 驗證資料
+    const { isValid, errors } = validateCSVData(parsedData)
+    
+    if (!isValid) {
+      alert(`CSV 檔案有以下錯誤:\n${errors.join('\n')}`)
+      return
+    }
+
+    // 轉換資料格式
+    const transactions = parsedData.map(row => ({
+      type: row.type as 'buy' | 'sell',
+      assetType: row.assetType || 'tw_stock',
+      symbol: row.symbol,
+      stockName: row.stockName,
+      date: row.date,
+      quantity: Number(row.quantity),
+      price: Number(row.price),
+      fee: Number(row.fee),
+      total: Number(row.total)
+    }))
+
+    // 確認匯入
+    if (confirm(`確定要匯入 ${transactions.length} 筆交易記錄嗎？`)) {
+      await addTransactions(transactions)
+      alert(`成功匯入 ${transactions.length} 筆交易記錄`)
+    }
+
+  } catch (error) {
+    console.error('匯入 CSV 失敗:', error)
+    alert('匯入 CSV 檔案時發生錯誤，請檢查檔案格式')
+  } finally {
+    // 清除檔案選擇
+    target.value = ''
+  }
 }
 </script>

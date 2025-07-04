@@ -27,18 +27,18 @@
         <div class="flex gap-4 justify-center mb-6">
           <button type="button"
                   @click="form.type = 'buy'; onTypeChange()"
-                  class="px-6 py-3 rounded-full font-bold text-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                  class="px-6 py-3 rounded-lg font-medium text-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2"
                   :class="form.type === 'buy' ?
-                    'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/25 focus:ring-red-500 transform scale-105' : 
-                    'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#6272a4] hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-gray-500'">
+                    'bg-red-600 dark:bg-red-700 text-white shadow-md focus:ring-red-500' : 
+                    'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 focus:ring-gray-500'">
             買入
           </button>
           <button type="button"
                   @click="form.type = 'sell'; onTypeChange()"
-                  class="px-6 py-3 rounded-full font-bold text-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                  class="px-6 py-3 rounded-lg font-medium text-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2"
                   :class="form.type === 'sell' ?
-                    'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/25 focus:ring-emerald-500 transform scale-105' :
-                    'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#6272a4] hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-gray-500'">
+                    'bg-emerald-600 dark:bg-emerald-700 text-white shadow-md focus:ring-emerald-500' :
+                    'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 focus:ring-gray-500'">
             賣出
           </button>
         </div>
@@ -285,10 +285,10 @@
         <div class="pt-6">
           <button 
             type="submit"
-            class="w-full px-8 py-4 rounded-xl font-semibold text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
+            class="w-full px-8 py-4 rounded-lg font-medium text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             :class="form.type === 'buy' ? 
-              'bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 focus:ring-red-500 shadow-lg shadow-red-500/25' : 
-              'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 focus:ring-emerald-500 shadow-lg shadow-emerald-500/25'"
+              'bg-red-600 dark:bg-red-700 hover:bg-red-700 dark:hover:bg-red-600 focus:ring-red-500 shadow-md' : 
+              'bg-emerald-600 dark:bg-emerald-700 hover:bg-emerald-700 dark:hover:bg-emerald-600 focus:ring-emerald-500 shadow-md'"
 :disabled="!canSubmit || hasValidationErrors"
           >
             <span class="flex items-center justify-center space-x-2">
